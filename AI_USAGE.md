@@ -41,3 +41,21 @@ Claude also read the Next.js 16 docs bundled in `node_modules/next/dist/docs/` b
 **What I learned:** [Fill in — e.g., how Next.js App Router route groups `(name)` organize URLs without affecting the path, or how async params work in Next 16.]
 
 **Retained/modified/discarded:** Scaffold retained; documentation stubs will be filled in with real content as each corresponding feature is built, per the plan's Phase 10.
+
+---
+
+## 2026-07-19 — GitHub repo + database schema + Supabase auth + guest mode
+
+**Tool:** Claude (Sonnet 5, via Claude Code)
+
+**Purpose:** Push the scaffold to a real GitHub repository, design and write the full Postgres schema, and wire up Supabase authentication plus a no-account guest mode.
+
+**Assistance provided:** Claude added the `git@github.com:hgurappadi-lab/Congressional-app-challenge.git` remote and pushed (after I created the repo myself and set my real git commit identity). It wrote `supabase/schema.sql` implementing the table design and evidence/allergen-assessment vocabulary I specified in the plan, using CHECK constraints (not native Postgres enums) so the vocabulary stays easy to extend, plus Row Level Security policies (private `profiles`/`favorites`, public-read/service-role-write everything else). It also wrote the Supabase client helpers (`src/lib/supabase/{client,server,admin}.js`), a `src/proxy.js` session-refresh handler (verified against the actual Next.js 16 docs, not assumed, since `middleware.js` was renamed to `proxy.js` in this version), sign up/in/out pages and an email-confirmation callback route, and `src/lib/profile.js` for localStorage-backed guest profiles.
+
+**My contribution:** [Fill in — e.g., any schema fields you added/changed after creating your real Supabase project, any RLS policy you tightened, any UI text you rewrote.]
+
+**Tested so far:** Local build (`npm run build`), lint (`npm run lint`), and unit test pipeline (`npm test`) all pass. The schema and auth flow have **not** yet been run against a live Supabase project — that requires the Supabase project to exist first with real credentials in `.env.local`. [Fill in once you've run `schema.sql` in the Supabase SQL editor and manually tested sign-up/confirm/sign-in/sign-out.]
+
+**What I learned:** [Fill in — e.g., why RLS policies are written per-operation (select/insert/update/delete) rather than one blanket policy, or how the service-role key bypasses RLS and why that means it must never reach the browser.]
+
+**Retained/modified/discarded:** All retained pending live testing once Supabase credentials are available.
