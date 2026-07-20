@@ -52,10 +52,28 @@ Claude also read the Next.js 16 docs bundled in `node_modules/next/dist/docs/` b
 
 **Assistance provided:** Claude added the `git@github.com:hgurappadi-lab/Congressional-app-challenge.git` remote and pushed (after I created the repo myself and set my real git commit identity). It wrote `supabase/schema.sql` implementing the table design and evidence/allergen-assessment vocabulary I specified in the plan, using CHECK constraints (not native Postgres enums) so the vocabulary stays easy to extend, plus Row Level Security policies (private `profiles`/`favorites`, public-read/service-role-write everything else). It also wrote the Supabase client helpers (`src/lib/supabase/{client,server,admin}.js`), a `src/proxy.js` session-refresh handler (verified against the actual Next.js 16 docs, not assumed, since `middleware.js` was renamed to `proxy.js` in this version), sign up/in/out pages and an email-confirmation callback route, and `src/lib/profile.js` for localStorage-backed guest profiles.
 
-**My contribution:** [Fill in — e.g., any schema fields you added/changed after creating your real Supabase project, any RLS policy you tightened, any UI text you rewrote.]
+**My contribution:** Created the real Supabase project (`hgurappadi-lab's Org` / project "Congressional app challenge"), ran `schema.sql` in the SQL Editor, configured the `/auth/callback` redirect URL, and provided the project credentials for `.env.local`. Caught and had Claude fix a real misconfiguration: I initially pasted the REST endpoint URL (`.../rest/v1/`) instead of the bare project URL into `NEXT_PUBLIC_SUPABASE_URL`, which broke every query with a client-side error — fixed by removing the path suffix.
 
-**Tested so far:** Local build (`npm run build`), lint (`npm run lint`), and unit test pipeline (`npm test`) all pass. The schema and auth flow have **not** yet been run against a live Supabase project — that requires the Supabase project to exist first with real credentials in `.env.local`. [Fill in once you've run `schema.sql` in the Supabase SQL editor and manually tested sign-up/confirm/sign-in/sign-out.]
+**Tested so far:** All 10 tables confirmed created in the live Supabase project (verified by querying each one). Supabase Auth admin API confirmed working (created and deleted a throwaway test user programmatically). Then did the real end-to-end user journey manually in the browser against the running dev server: signed up with a real email at `/auth/signup`, received the confirmation email, clicked the link, landed on `/home` via `/auth/callback` showing "Signed in as [email]", clicked Sign out, confirmed it returned to guest-mode `/home`. All steps worked as expected — no errors.
 
-**What I learned:** [Fill in — e.g., why RLS policies are written per-operation (select/insert/update/delete) rather than one blanket policy, or how the service-role key bypasses RLS and why that means it must never reach the browser.]
+**What I learned:** The moved-directory incident (see the 2026-07-19 "Move project off iCloud-synced Desktop" note in this log) plus the REST-URL misconfiguration were both good real debugging reps: reading actual error messages (`PGRST205` "table not found in schema cache" vs. `PGRST125` "invalid path") to distinguish "schema not run yet" from "wrong URL shape" rather than guessing. Also clarified why the service-role key is safe to use in a script but must never ship to the browser (it bypasses every RLS policy in `schema.sql`).
 
-**Retained/modified/discarded:** All retained pending live testing once Supabase credentials are available.
+**Retained/modified/discarded:** All retained — this is the first fully live-tested piece of the app.
+
+---
+
+## 2026-07-19 — Moved project off iCloud-synced Desktop folder
+
+**Tool:** Claude (Sonnet 5, via Claude Code)
+
+**Purpose:** Fix a Finder "Error" state on project files (package.json, src/, supabase/, .git) discovered while trying to open `.env.local`.
+
+**Assistance provided:** Claude diagnosed the cause via `brctl status` — my Mac's iCloud storage was full and Desktop is iCloud-synced, so the CloudDocs daemon was failing to sync project files (including a 1.77GB stuck video upload), which was surfacing as per-file errors in Finder. Risk: git + `node_modules` (thousands of small files) inside a full, actively-failing iCloud sync is a known source of file corruption and broken git state. Claude moved the whole project from `~/Desktop/CAC` to `~/Projects/allergy-food-app` (outside iCloud sync scope) and verified `git status` and `npm run build` both still worked cleanly from the new location before continuing.
+
+**My contribution:** Chose the "move the project" option over freeing iCloud storage or disabling Desktop sync entirely, after Claude laid out the tradeoffs.
+
+**Tested:** `git status` (clean, remote intact), `npm run build` (succeeded) immediately after the move.
+
+**What I learned:** Desktop & Documents iCloud sync can silently interfere with local dev tooling (git, node_modules) well before it's obvious why — the Finder "Error" badges were the only visible symptom until the underlying `brctl status` output showed the actual quota-exceeded sync failure.
+
+**Retained/modified/discarded:** Move retained; project now lives permanently at `~/Projects/allergy-food-app`.
