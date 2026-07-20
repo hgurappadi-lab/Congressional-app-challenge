@@ -46,4 +46,31 @@ Only publicly available information intended for public consumption (restaurant 
 
 ## Dataset scope (as of this writing)
 
-_To be filled in once the curated dataset (Phase 3) is complete: exact restaurant count, menu item count, and the specific San Diego neighborhood(s) covered._
+**Collected 2026-07-20** — 20 restaurants, 74 menu items, within a 15-mile radius of a North San Diego County reference point (32.9670, -117.1717 — Torrey Highlands/Rancho del Sol), spanning Rancho Bernardo, Carmel Mountain Ranch, Poway, Mira Mesa, La Jolla, Carmel Valley, Del Mar, Solana Beach, and Encinitas. This meets the plan's 15–30 restaurant MVP target.
+
+| Restaurant | Cuisine | Evidence quality |
+|---|---|---|
+| Chipotle Mexican Grill | Mexican | Official allergen/ingredient statement |
+| CAVA | Mediterranean | Official per-item allergen guide (PDF) |
+| In-N-Out Burger | Burgers | Official allergen chart (PDF) |
+| True Food Kitchen | Health-focused American | Official seasonal nutritional/allergen guide (PDF) |
+| P.F. Chang's | Chinese/Asian Fusion | Official gluten-free menu page |
+| Panera Bread | Bakery-Cafe | Official allergen page exists; item-level PDF was inaccessible during collection, so items are conservatively sourced from public descriptions |
+| Plant Power Fast Food | Vegan Fast Food | Restaurant-confirmed 100% plant-based; named ingredients per item |
+| Nectarine Grove | American (Gluten-Free) | Restaurant-confirmed 100% gluten-free; named ingredients per item |
+| Sweetgreen | Salads | Public menu description only — low confidence throughout |
+| Casa Lahori | Pakistani (halal) | Restaurant-stated halal; no published ingredient list — mostly `unknown`/low-confidence allergens |
+| Spoon Thai Kitchen | Thai | Dish names only — low-confidence allergens based on typical preparation |
+| Burma Place | Burmese | Restaurant's own menu descriptions; allergens beyond that are low-confidence |
+| The Shop: Pizza + Cocktails | Pizza | Restaurant's own menu descriptions; offers a gluten-free crust option |
+| Carmel Sushi | Japanese | Third-party aggregator only — low-confidence allergens |
+| Pho Ca Dao & Grill | Vietnamese | Real menu/prices; low-confidence allergens based on typical preparation |
+| Indian Tandoor | Indian | Real menu/prices; named ingredients per item |
+| Aqua Mare Cucina Italiana | Italian | Real menu/prices; named ingredients per item |
+| Manna Heaven BBQ | Korean BBQ | Real menu/prices; low-confidence allergens based on typical preparation |
+| Szechuan House | Chinese (Szechuan) | Real dish names; low-confidence allergens based on typical preparation |
+| The Fish Market - Del Mar | Seafood | Named ingredients per item; preparation-based allergens for items like batter |
+
+This mix is intentional: the chains with official per-item allergen guides (CAVA, In-N-Out, True Food Kitchen, Chipotle, P.F. Chang's) demonstrate the app's high-confidence `official_allergen_guide` path end-to-end. Plant Power and Nectarine Grove demonstrate strong restaurant-level dietary claims (100% vegan / 100% gluten-free). The remaining independents demonstrate the low-confidence / `unknown` path that is just as central to the product's honesty model — most have no published ingredient list at all, so assessments are conservatively based on typical preparation for that dish, not assumed.
+
+One candidate restaurant (2Good2B Bakery & Cafe) was dropped after research showed both of its San Diego-area locations are permanently closed — the dataset only includes restaurants confirmed operating as of collection date.

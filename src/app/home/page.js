@@ -40,6 +40,24 @@ export default async function HomePage() {
           </Link>
         </>
       )}
+
+      <Link
+        href="/map"
+        className="w-full rounded-md bg-zinc-900 px-4 py-3 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+      >
+        Explore Nearby
+      </Link>
+
+      <Link
+        href="/map?mode=find-dish"
+        className="w-full rounded-md border border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-700 dark:text-zinc-50"
+      >
+        Find a Dish
+      </Link>
+
+      <Link href="/profile" className="text-sm underline">
+        Edit allergy &amp; dietary profile
+      </Link>
     </main>
   );
 }
