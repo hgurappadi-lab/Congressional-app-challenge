@@ -185,3 +185,21 @@ Claude also read the Next.js 16 docs bundled in `node_modules/next/dist/docs/` b
 **What I learned:** [Fill in.]
 
 **Retained/modified/discarded:** All retained. Restaurant/dish detail pages and favorites are the remaining open phases.
+
+---
+
+## 2026-07-20 — Phase 7: Restaurant detail pages
+
+**Tool:** Claude (Sonnet 5, via Claude Code)
+
+**Purpose:** Build the restaurant detail page (plan §17): the drill-down from an Explore Nearby result card into a single restaurant's full Choice Availability Score breakdown and categorized menu.
+
+**Assistance provided:** Claude planned the feature in plan mode before writing code (design written to `~/.claude/plans/drifting-giggling-cupcake.md`) and, once approved, added `fetchRestaurantById()` to the shared `src/app/api/_lib/restaurants.js` helper (a server-side `.eq("id", id)` filter rather than reusing the existing `fetchRestaurantsWithEvidence()` and discarding all but one row), a new `POST /api/restaurant/[id]` route handler that runs the restaurant's full menu through the existing `classifyDish()`/`scoreRestaurant()` logic and returns full per-dish detail (not the abbreviated list-view shape `/api/rank` returns), and the page itself (`src/app/restaurant/[id]/page.js` + `RestaurantDetailClient.js`, following the same profile-loading pattern already established in `MapPageClient.js`). While building this, Claude also factored two small pieces out of `MapPageClient.js` that were about to be duplicated a second time: `CLASSIFICATION_LABELS` into `src/lib/classification-labels.js`, and the plan §18 safety-disclaimer paragraph into `src/components/SafetyDisclaimer.js` — both will be reused again by the dish detail page (step 8) and favorites (step 9). Added `src/lib/group-dishes.js` (`groupDishesByCategory()`, the one genuinely new piece of deterministic logic in this step) with unit tests, plus a unit test asserting `CLASSIFICATION_LABELS` stays in sync with the 5 classification values. Wired `/map`'s restaurant cards to actually link to the new page.
+
+**My contribution:** None yet — reviewing.
+
+**Tested:** `npm test` (52/52 passing, 4 new). `npm run lint` and `npm run build` both clean. This session, Claude got real browser automation for the first time (Playwright, driven headlessly via a throwaway driver script — the Claude-in-Chrome extension the user installed previously still isn't exposed as a tool in this environment) and used it to click an actual restaurant card on `/map`, land on `/restaurant/[id]`, and confirm the score/stats/disclaimer/categorized-menu all render correctly — including confirming the score and per-dish reasons actually change when a peanut allergy is set in the profile (score dropped from a documented 90/100 with no profile to 0/100 with peanuts selected, since Manna Heaven BBQ has no peanut-specific evidence). Also drove a fake-UUID URL directly to confirm the 404 case shows a clean "Restaurant not found" state instead of crashing.
+
+**What I learned:** [Fill in.]
+
+**Retained/modified/discarded:** All retained. Dish detail pages and favorites are the remaining open phases.

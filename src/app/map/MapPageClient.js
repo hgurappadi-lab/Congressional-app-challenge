@@ -7,17 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import { loadGuestProfile, loadUserProfile } from "@/lib/profile";
 import { NEIGHBORHOODS } from "@/lib/neighborhoods";
 import RestaurantMap from "@/components/RestaurantMap";
+import { CLASSIFICATION_LABELS } from "@/lib/classification-labels";
 
 const RADIUS_OPTIONS_MILES = [1, 3, 5, 10, 15];
 const SEARCH_DEBOUNCE_MS = 400;
-
-const CLASSIFICATION_LABELS = {
-  strong_documented_potential_match: "Strong documented potential match",
-  modification_needed: "May match with a modification",
-  confirm_before_ordering: "Confirm before ordering",
-  allergen_identified: "Allergen identified",
-  insufficient_information: "Insufficient information",
-};
 
 export default function MapPageClient() {
   const searchParams = useSearchParams();
@@ -302,38 +295,40 @@ export default function MapPageClient() {
       {mode === "explore" ? (
         <ul className="flex flex-col gap-3">
           {(restaurantResults ?? []).map((restaurant) => (
-            <li
-              key={restaurant.id}
-              className="flex flex-col gap-2 rounded-md border border-zinc-200 p-4 dark:border-zinc-800"
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-medium text-zinc-900 dark:text-zinc-50">
-                  {restaurant.name}
-                </span>
-                <span className="text-sm text-zinc-500">{restaurant.distanceMiles} mi</span>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                {restaurant.cuisine} · Choice Availability Score: {restaurant.score}/100
-              </p>
+            <li key={restaurant.id}>
+              <Link
+                href={`/restaurant/${restaurant.id}`}
+                className="flex flex-col gap-2 rounded-md border border-zinc-200 p-4 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                    {restaurant.name}
+                  </span>
+                  <span className="text-sm text-zinc-500">{restaurant.distanceMiles} mi</span>
+                </div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-500">
+                  {restaurant.cuisine} · Choice Availability Score: {restaurant.score}/100
+                </p>
 
-              <div className="flex flex-wrap gap-1">
-                {Object.entries(restaurant.classificationCounts)
-                  .filter(([, count]) => count > 0)
-                  .map(([classification, count]) => (
-                    <span
-                      key={classification}
-                      className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                    >
-                      {count} {CLASSIFICATION_LABELS[classification]}
-                    </span>
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(restaurant.classificationCounts)
+                    .filter(([, count]) => count > 0)
+                    .map(([classification, count]) => (
+                      <span
+                        key={classification}
+                        className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                      >
+                        {count} {CLASSIFICATION_LABELS[classification]}
+                      </span>
+                    ))}
+                </div>
+
+                <ul className="list-inside list-disc text-xs text-zinc-600 dark:text-zinc-400">
+                  {restaurant.explanation.map((line, i) => (
+                    <li key={i}>{line}</li>
                   ))}
-              </div>
-
-              <ul className="list-inside list-disc text-xs text-zinc-600 dark:text-zinc-400">
-                {restaurant.explanation.map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
+                </ul>
+              </Link>
             </li>
           ))}
         </ul>
