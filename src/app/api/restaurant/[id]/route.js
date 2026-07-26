@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { classifyDish } from "@/lib/classification";
 import { scoreRestaurant } from "@/lib/scoring";
-import { weakestConfidence } from "@/lib/evidence";
+import { weakestConfidence, evidenceHighlight } from "@/lib/evidence";
 import { fetchRestaurantById } from "../../_lib/restaurants";
 
 // POST /api/restaurant/[id]
@@ -62,7 +62,9 @@ export async function POST(request, { params }) {
       category: item.category,
       classification: result.classification,
       reasons: result.reasons,
+      criteria: result.criteria,
       evidenceConfidence,
+      evidenceHighlight: evidenceHighlight(item.item_allergens ?? []),
       evaluation: {
         classification: result.classification,
         confidence: evidenceConfidence,
@@ -95,8 +97,11 @@ export async function POST(request, { params }) {
     crossContactTransparencyPercent: scoreResult.crossContactTransparencyPercent,
     freshnessDays: scoreResult.freshnessDays,
     explanation: scoreResult.explanation,
+    evidenceHighlight: evidenceHighlight(
+      (restaurant.menu_items ?? []).flatMap((item) => item.item_allergens ?? []),
+    ),
     dishes: dishes.map(
-      ({ id, name, description, price, category, classification, reasons, evidenceConfidence }) => ({
+      ({
         id,
         name,
         description,
@@ -104,7 +109,20 @@ export async function POST(request, { params }) {
         category,
         classification,
         reasons,
+        criteria,
         evidenceConfidence,
+        evidenceHighlight: dishEvidenceHighlight,
+      }) => ({
+        id,
+        name,
+        description,
+        price,
+        category,
+        classification,
+        reasons,
+        criteria,
+        evidenceConfidence,
+        evidenceHighlight: dishEvidenceHighlight,
       }),
     ),
   });

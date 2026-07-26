@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { classifyDish } from "@/lib/classification";
-import { weakestConfidence } from "@/lib/evidence";
+import { weakestConfidence, evidenceHighlight } from "@/lib/evidence";
 import { haversineDistanceMiles } from "@/lib/geo";
 import { searchMenuItems } from "@/lib/search";
 import { fetchRestaurantsWithEvidence } from "../_lib/restaurants";
@@ -112,7 +112,9 @@ export async function POST(request) {
         relevance: item.relevance,
         classification: result.classification,
         reasons: result.reasons,
+        criteria: result.criteria,
         evidenceConfidence: weakestConfidence(result.confidences),
+        evidenceHighlight: evidenceHighlight(item.item_allergens ?? []),
         combinedScore: Math.round(combinedScore * 100) / 100,
       };
     })

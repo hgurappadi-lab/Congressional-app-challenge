@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { classifyDish } from "@/lib/classification";
 import { scoreRestaurant } from "@/lib/scoring";
-import { weakestConfidence } from "@/lib/evidence";
+import { weakestConfidence, evidenceHighlight } from "@/lib/evidence";
 import { haversineDistanceMiles } from "@/lib/geo";
 import { fetchRestaurantsWithEvidence } from "../_lib/restaurants";
 
@@ -113,6 +113,9 @@ export async function POST(request) {
         crossContactTransparencyPercent: scoreResult.crossContactTransparencyPercent,
         freshnessDays: scoreResult.freshnessDays,
         explanation: scoreResult.explanation,
+        evidenceHighlight: evidenceHighlight(
+          (restaurant.menu_items ?? []).flatMap((item) => item.item_allergens ?? []),
+        ),
         dishes: dishes.map(({ id, name, category, classification }) => ({
           id,
           name,

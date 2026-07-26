@@ -22,12 +22,12 @@ Supabase RLS policies ensure a user can only read/write their own `profiles` and
 
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — safe to expose to the browser; protected by RLS, not secrecy.
 - `SUPABASE_SERVICE_ROLE_KEY` — server-side only, never in client code, never committed, used only by seed scripts.
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` — exposed to the browser by design (client-side map rendering requires it), but restricted by HTTP referrer (only our deployed domain + localhost for dev) and scoped to the Maps JavaScript API only, with a Google Cloud billing budget alert configured as a safety net.
+- No map API key is needed — the interactive map uses Leaflet with OpenStreetMap tiles, which are free and don't require a key, account, or billing setup.
 - No secret key is ever committed to the repository; `.env.local` is gitignored, and `.env.example` documents required variables with placeholder values only.
 
 ## User account deletion
 
-_To be implemented and documented here alongside the profile/account feature (Phase 2/4): how a user deletes their account and what happens to their stored profile/favorites data._
+A signed-in user can permanently delete their account from `/profile` ("Delete my account", behind a confirmation prompt). This calls `DELETE /api/account`, which verifies the request's own session identity (never a client-supplied id — a user can only ever delete their own account) and then deletes the underlying Supabase Auth user via the service-role admin client (deleting an `auth.users` row requires admin privileges). Both `profiles` and `favorites` reference `auth.users(id)` with `on delete cascade` (see `supabase/schema.sql`), so the user's saved food profile and all favorites are removed automatically in the same operation — no separate cleanup step, and nothing is left behind. Guest users have nothing to delete server-side; clearing their browser's localStorage removes everything.
 
 ## Reviewed dependency vulnerabilities
 

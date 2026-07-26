@@ -159,6 +159,52 @@ describe("classifyDish — dietary restrictions", () => {
   });
 });
 
+describe("classifyDish — vegan implies vegetarian, never the reverse", () => {
+  it("a dish with only a vegan row still counts as a vegetarian match", () => {
+    const result = classifyDish({
+      dietaryRestrictions: ["vegetarian"],
+      itemDietaryAttributes: [
+        { attribute: "vegan", status: "restaurant_confirmed", confidence: "high" },
+      ],
+    });
+    expect(result.classification).toBe(CLASSIFICATIONS.STRONG_MATCH);
+    expect(result.reasons[0]).toContain("vegetarian");
+  });
+
+  it("a direct vegetarian row still wins over a vegan row when both exist", () => {
+    const result = classifyDish({
+      dietaryRestrictions: ["vegetarian"],
+      itemDietaryAttributes: [
+        { attribute: "vegan", status: "not_compatible", confidence: "high" },
+        { attribute: "vegetarian", status: "restaurant_confirmed", confidence: "high" },
+      ],
+    });
+    expect(result.classification).toBe(CLASSIFICATIONS.STRONG_MATCH);
+  });
+
+  it("a dish with only a vegetarian row does NOT count as a vegan match", () => {
+    const result = classifyDish({
+      dietaryRestrictions: ["vegan"],
+      itemDietaryAttributes: [
+        { attribute: "vegetarian", status: "restaurant_confirmed", confidence: "high" },
+      ],
+    });
+    expect(result.classification).toBe(CLASSIFICATIONS.INSUFFICIENT_INFORMATION);
+  });
+
+  it("a dish marked not-vegan (e.g. contains dairy) is NOT thereby marked not-vegetarian", () => {
+    // A cheese pizza isn't vegan, but it is vegetarian — a vegan
+    // disqualifier must not be read as a vegetarian disqualifier too.
+    const result = classifyDish({
+      dietaryRestrictions: ["vegetarian"],
+      itemDietaryAttributes: [
+        { attribute: "vegan", status: "not_compatible", confidence: "high" },
+      ],
+    });
+    expect(result.classification).toBe(CLASSIFICATIONS.INSUFFICIENT_INFORMATION);
+  });
+});
+
 describe("classifyDish — matching strictness effects", () => {
   it("cautious moves an unresolved allergen into confirm-before-ordering instead of insufficient information", () => {
     const base = {

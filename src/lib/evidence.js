@@ -65,3 +65,15 @@ export function weakestConfidence(confidences) {
     confidenceRank(current) < confidenceRank(weakest) ? current : weakest,
   );
 }
+
+// A single presentation hint for the one evidence-quality badge shown on
+// compact result cards (design-system/MASTER.md). Reads evidence_source
+// values already present on rows the routes fetch from Supabase — adds no
+// new query. Returns null when nothing noteworthy is present, letting the
+// UI fall back to a coverage-percent-based label instead.
+export function evidenceHighlight(itemAllergens = []) {
+  if (itemAllergens.some((row) => row.evidence_source === "official_allergen_guide")) {
+    return "official_allergen_guide";
+  }
+  return null;
+}

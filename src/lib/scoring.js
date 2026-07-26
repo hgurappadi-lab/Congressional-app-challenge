@@ -13,11 +13,17 @@
 import { confidenceRank } from "./evidence";
 import { CLASSIFICATIONS } from "./classification";
 
+// INSUFFICIENT_INFORMATION carries a small positive weight, distinct from
+// ALLERGEN_IDENTIFIED's true floor of 0 — a dish nobody has documented yet
+// is a genuinely different (and better) prospect than one confirmed to
+// contain a selected allergen, and previously both scored identically,
+// which let restaurants with a confirmed allergen hit rank exactly even
+// with restaurants that simply lack data.
 const CLASSIFICATION_POINTS = {
   [CLASSIFICATIONS.STRONG_MATCH]: 3,
   [CLASSIFICATIONS.MODIFICATION_NEEDED]: 2,
   [CLASSIFICATIONS.CONFIRM_BEFORE_ORDERING]: 1,
-  [CLASSIFICATIONS.INSUFFICIENT_INFORMATION]: 0,
+  [CLASSIFICATIONS.INSUFFICIENT_INFORMATION]: 0.5,
   [CLASSIFICATIONS.ALLERGEN_IDENTIFIED]: 0,
 };
 
@@ -105,6 +111,15 @@ export function scoreRestaurant({
 
   const weightedPoints = dishEvaluations.reduce((sum, dish) => {
     const basePoints = CLASSIFICATION_POINTS[dish.classification] ?? 0;
+    // INSUFFICIENT_INFORMATION's dish-level confidence is itself always
+    // "insufficient" (that's what makes it that classification) — scaling
+    // its already-small base points by that same confidence would zero
+    // them out a second time, silently erasing the distinction from
+    // ALLERGEN_IDENTIFIED this tier exists to make. Its points count
+    // directly instead.
+    if (dish.classification === CLASSIFICATIONS.INSUFFICIENT_INFORMATION) {
+      return sum + basePoints;
+    }
     const qualityFactor = confidenceRank(dish.confidence) / 3;
     return sum + basePoints * qualityFactor;
   }, 0);

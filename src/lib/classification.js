@@ -27,6 +27,18 @@ const SEVERITY = {
   CLEAR: 0, // confirmed absent/compatible with strong evidence
 };
 
+// Plain-language status per severity tier — used only to label the
+// `criteria` entries returned below for UI grouping (e.g. "4 unknown"
+// badges). Purely descriptive; does not affect the severity/classification
+// logic above in any way.
+const SEVERITY_STATUS = {
+  [SEVERITY.BLOCKING]: "identified",
+  [SEVERITY.UNRESOLVED]: "unknown",
+  [SEVERITY.NEEDS_CONFIRMATION]: "needs_confirmation",
+  [SEVERITY.MODIFIABLE]: "modifiable",
+  [SEVERITY.CLEAR]: "clear",
+};
+
 const CONTAINS_ASSESSMENTS = new Set([
   "restaurant_disclosed_contains",
   "official_guide_contains",
@@ -66,11 +78,11 @@ const CRITERION_SYNONYMS = {
   pescatarian: ["pescatarian"],
 };
 
-function label(id) {
+export function label(id) {
   return id.replace(/_/g, " ");
 }
 
-function isAddressedByModification(id, modifications) {
+export function isAddressedByModification(id, modifications) {
   const synonyms = CRITERION_SYNONYMS[id] || [id];
   return modifications.some((mod) =>
     synonyms.some((word) => mod.description.toLowerCase().includes(word)),
@@ -146,15 +158,38 @@ function evaluateAllergen(allergenId, itemAllergens, modifications, matchingStri
   };
 }
 
+// Vegan implies vegetarian — never the reverse (a vegetarian dish may still
+// contain dairy/eggs, which disqualify vegan). So when checking
+// "vegetarian" and the dish has no vegetarian row of its own, a documented
+// vegan row is still valid evidence for it. Checking "vegan" never falls
+// back to a vegetarian row. Shared with questions.js so a user-facing
+// classification and the generated staff questions can't disagree about
+// what's already known for a dish.
+export function findDietaryEvidence(restrictionId, itemDietaryAttributes) {
+  const direct = itemDietaryAttributes.find((row) => row.attribute === restrictionId);
+  if (direct) return direct;
+
+  if (restrictionId === "vegetarian") {
+    const veganEvidence = itemDietaryAttributes.find((row) => row.attribute === "vegan");
+    // Only borrow it when the dish is (possibly) vegan — a vegan
+    // disqualifier (dairy, egg) says nothing about whether the dish
+    // separately contains meat, so a "not_compatible"/"unknown" vegan row
+    // must NOT be read as evidence against vegetarian too.
+    const isPositiveVeganEvidence =
+      veganEvidence && veganEvidence.status !== "not_compatible" && veganEvidence.status !== "unknown";
+    if (isPositiveVeganEvidence) return veganEvidence;
+  }
+
+  return undefined;
+}
+
 function evaluateDietaryRestriction(
   restrictionId,
   itemDietaryAttributes,
   modifications,
   matchingStrictness,
 ) {
-  const evidence = itemDietaryAttributes.find(
-    (row) => row.attribute === restrictionId,
-  );
+  const evidence = findDietaryEvidence(restrictionId, itemDietaryAttributes);
   const name = label(restrictionId);
 
   if (!evidence) {
@@ -226,11 +261,16 @@ function evaluateDietaryRestriction(
 // the plan ties escalation to matching_strictness (a user-controlled
 // setting), not per-allergen severity.
 //
-// Returns { classification, reasons, confidences }. `confidences` is the
-// confidence tier behind each assessed criterion (see evidence.js's
+// Returns { classification, reasons, confidences, criteria }. `confidences`
+// is the confidence tier behind each assessed criterion (see evidence.js's
 // weakestConfidence) — intended for scoring.js to represent a dish's
 // overall evidence quality as the weakest link among what was actually
-// checked, not every confidence value in the dataset.
+// checked, not every confidence value in the dataset. `criteria` is a
+// presentation-facing array (one entry per selected allergen/dietary
+// restriction, in the same order as `reasons`/`confidences`) exposing the
+// per-criterion status the UI needs for compact badges (e.g. "identified",
+// "unknown") without re-parsing `reasons` strings. It is purely additive —
+// does not affect `classification` and mirrors data already computed above.
 export function classifyDish({
   allergies = [],
   dietaryRestrictions = [],
@@ -240,20 +280,37 @@ export function classifyDish({
   modifications = [],
   crossContactNotes = [],
 }) {
-  const allergenResults = allergies.map((entry) =>
-    evaluateAllergen(entry.allergen, itemAllergens, modifications, matchingStrictness),
-  );
-  const dietaryResults = dietaryRestrictions.map((restrictionId) =>
-    evaluateDietaryRestriction(
+  const allergenResults = allergies.map((entry) => ({
+    id: entry.allergen,
+    kind: "allergen",
+    label: label(entry.allergen),
+    ...evaluateAllergen(entry.allergen, itemAllergens, modifications, matchingStrictness),
+  }));
+  const dietaryResults = dietaryRestrictions.map((restrictionId) => ({
+    id: restrictionId,
+    kind: "dietary",
+    label: label(restrictionId),
+    ...evaluateDietaryRestriction(
       restrictionId,
       itemDietaryAttributes,
       modifications,
       matchingStrictness,
     ),
-  );
+  }));
   const results = [...allergenResults, ...dietaryResults];
   const reasons = results.map((r) => r.reason);
   const confidences = results.map((r) => r.confidence);
+  // Additive, presentation-facing detail per selected criterion — the same
+  // data already computed above, just not discarded. Does not affect
+  // `classification`/`reasons`/`confidences` below in any way.
+  const criteria = results.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    label: r.label,
+    status: SEVERITY_STATUS[r.severity],
+    confidence: r.confidence,
+    reason: r.reason,
+  }));
 
   if (results.length === 0) {
     return {
@@ -263,19 +320,21 @@ export function classifyDish({
       ],
       // Nothing to be uncertain about when nothing was selected.
       confidences: ["high"],
+      criteria: [],
     };
   }
 
   const worst = Math.max(...results.map((r) => r.severity));
 
   if (worst === SEVERITY.BLOCKING) {
-    return { classification: CLASSIFICATIONS.ALLERGEN_IDENTIFIED, reasons, confidences };
+    return { classification: CLASSIFICATIONS.ALLERGEN_IDENTIFIED, reasons, confidences, criteria };
   }
   if (worst === SEVERITY.UNRESOLVED) {
     return {
       classification: CLASSIFICATIONS.INSUFFICIENT_INFORMATION,
       reasons,
       confidences,
+      criteria,
     };
   }
   if (worst === SEVERITY.NEEDS_CONFIRMATION) {
@@ -283,10 +342,11 @@ export function classifyDish({
       classification: CLASSIFICATIONS.CONFIRM_BEFORE_ORDERING,
       reasons,
       confidences,
+      criteria,
     };
   }
   if (worst === SEVERITY.MODIFIABLE) {
-    return { classification: CLASSIFICATIONS.MODIFICATION_NEEDED, reasons, confidences };
+    return { classification: CLASSIFICATIONS.MODIFICATION_NEEDED, reasons, confidences, criteria };
   }
 
   // worst === SEVERITY.CLEAR: every selected allergen/restriction is
@@ -301,8 +361,9 @@ export function classifyDish({
         "Cross-contact information is unknown for this dish. Confirm directly with the restaurant.",
       ],
       confidences,
+      criteria,
     };
   }
 
-  return { classification: CLASSIFICATIONS.STRONG_MATCH, reasons, confidences };
+  return { classification: CLASSIFICATIONS.STRONG_MATCH, reasons, confidences, criteria };
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Salad, Leaf, ShieldCheck, Save, Trash2 } from "lucide-react";
+import { lora } from "@/lib/fonts";
 import { createClient } from "@/lib/supabase/client";
 import {
   emptyProfile,
@@ -10,12 +12,26 @@ import {
   loadUserProfile,
   saveUserProfile,
 } from "@/lib/profile";
-import {
-  ALLERGENS,
-  SEVERITY_LEVELS,
-  DIETARY_RESTRICTIONS,
-  MATCHING_STRICTNESS_OPTIONS,
-} from "@/lib/profile-options";
+import { ALLERGENS, DEFAULT_ALLERGY_SEVERITY, DIETARY_RESTRICTIONS } from "@/lib/profile-options";
+import AllergenChip from "@/components/AllergenChip";
+import DietaryChip from "@/components/DietaryChip";
+import ProfileSummary from "@/components/ProfileSummary";
+import SafetyDisclaimer from "@/components/SafetyDisclaimer";
+
+const OFFERED_DIETARY_IDS = new Set(DIETARY_RESTRICTIONS.map((d) => d.id));
+
+// Matching strictness is no longer user-configurable (always "standard"),
+// and dietary restrictions are now only offered as a subset of what the
+// schema supports — normalize both on load so an older saved profile
+// (from before either change) doesn't carry a restriction/setting there's
+// no longer a control for.
+function normalizeProfile(profile) {
+  return {
+    ...profile,
+    matching_strictness: "standard",
+    dietary_restrictions: profile.dietary_restrictions.filter((id) => OFFERED_DIETARY_IDS.has(id)),
+  };
+}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -23,6 +39,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(emptyProfile());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -40,12 +57,12 @@ export default function ProfilePage() {
         setUserId(user.id);
         try {
           const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(loaded);
+          if (!cancelled) setProfile(normalizeProfile(loaded));
         } catch (error) {
           if (!cancelled) setErrorMessage(error.message);
         }
       } else {
-        setProfile(loadGuestProfile());
+        setProfile(normalizeProfile(loadGuestProfile()));
       }
 
       if (!cancelled) setLoading(false);
@@ -62,18 +79,9 @@ export default function ProfilePage() {
       const exists = prev.allergies.some((a) => a.allergen === allergenId);
       const allergies = exists
         ? prev.allergies.filter((a) => a.allergen !== allergenId)
-        : [...prev.allergies, { allergen: allergenId, severity: "moderate" }];
+        : [...prev.allergies, { allergen: allergenId, severity: DEFAULT_ALLERGY_SEVERITY }];
       return { ...prev, allergies };
     });
-  }
-
-  function setAllergenSeverity(allergenId, severity) {
-    setProfile((prev) => ({
-      ...prev,
-      allergies: prev.allergies.map((a) =>
-        a.allergen === allergenId ? { ...a, severity } : a,
-      ),
-    }));
   }
 
   function toggleDietaryRestriction(restrictionId) {
@@ -84,10 +92,6 @@ export default function ProfilePage() {
         : [...prev.dietary_restrictions, restrictionId];
       return { ...prev, dietary_restrictions };
     });
-  }
-
-  function setMatchingStrictness(value) {
-    setProfile((prev) => ({ ...prev, matching_strictness: value }));
   }
 
   async function handleSubmit(event) {
@@ -109,145 +113,163 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    const confirmed = window.confirm(
+      "Delete your account? This permanently removes your profile and favorites and can't be undone.",
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setErrorMessage("");
+    try {
+      const response = await fetch("/api/account", { method: "DELETE" });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || `Request failed (${response.status}).`);
+      }
+      router.push("/welcome");
+    } catch (error) {
+      setErrorMessage(error.message);
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="mx-auto flex max-w-lg flex-1 items-center justify-center px-6 py-16">
-        <p className="text-sm text-zinc-500 dark:text-zinc-500">Loading…</p>
+        <p className="text-sm text-text-muted">Loading…</p>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-8 px-6 py-12">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Your food profile
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          {userId
-            ? "Saved to your account."
-            : "Saved on this device only — sign up to keep it across devices."}
-        </p>
-      </div>
+    <main className="relative flex-1 overflow-hidden bg-gradient-to-br from-pale-green via-page to-page px-4 py-8 sm:px-6 sm:py-10">
+      <Leaf aria-hidden="true" className="pointer-events-none absolute -left-4 top-1/3 h-24 w-24 -rotate-12 text-accent opacity-10" />
+      <Leaf aria-hidden="true" className="pointer-events-none absolute -right-6 bottom-24 h-32 w-32 rotate-45 text-accent opacity-10" />
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            Allergies
-          </legend>
-          <div className="flex flex-col gap-2">
-            {ALLERGENS.map((allergen) => {
-              const selected = profile.allergies.find(
-                (a) => a.allergen === allergen.id,
-              );
-              return (
-                <div
-                  key={allergen.id}
-                  className="flex items-center justify-between gap-3 rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
-                >
-                  <label className="flex items-center gap-2 text-sm text-zinc-900 dark:text-zinc-50">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(selected)}
-                      onChange={() => toggleAllergen(allergen.id)}
+      <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <div className="flex items-center gap-2.5 px-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-base font-semibold text-white">
+            C
+          </span>
+          <span className="text-lg font-semibold text-text">ClearPlate</span>
+        </div>
+
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-sm sm:p-10 sm:pb-28">
+          <div className="pointer-events-none absolute right-8 top-8 hidden sm:block">
+            <span className="relative flex h-24 w-24 items-center justify-center rounded-full bg-soft-green text-primary">
+              <Salad aria-hidden="true" className="h-11 w-11" />
+              <Leaf aria-hidden="true" className="absolute -left-3 -top-2 h-4 w-4 text-accent opacity-70" />
+              <Leaf aria-hidden="true" className="absolute -right-2 top-12 h-3 w-3 text-accent opacity-50" />
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1 pr-0 sm:pr-28">
+            <h1 className={`${lora.className} text-3xl text-text sm:text-4xl`}>Your food profile</h1>
+            <p className="text-sm font-medium text-primary">
+              {userId
+                ? "Saved to your account."
+                : "Saved on this device only — sign up to keep it across devices."}
+            </p>
+          </div>
+
+          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-status-match-border bg-status-match-bg px-4 py-3 sm:mr-28">
+            <ShieldCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-status-match-text" />
+            <ProfileSummary
+              allergies={profile.allergies}
+              dietaryRestrictions={profile.dietary_restrictions}
+              className="text-sm font-medium text-status-match-text"
+            />
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-8">
+            <fieldset className="flex flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-soft-green text-primary">
+                  <Leaf aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <legend className={`${lora.className} text-xl text-text`}>Allergies</legend>
+              </div>
+              <p className="pl-[42px] text-sm text-text-secondary">
+                Select the ingredients you want to avoid.
+              </p>
+              <div className="flex flex-wrap gap-2 pl-[42px]">
+                {ALLERGENS.map((allergen) => {
+                  const selected = profile.allergies.some((a) => a.allergen === allergen.id);
+                  return (
+                    <AllergenChip
+                      key={allergen.id}
+                      label={allergen.label}
+                      icon={allergen.icon}
+                      selected={selected}
+                      onToggle={() => toggleAllergen(allergen.id)}
                     />
-                    {allergen.label}
-                  </label>
+                  );
+                })}
+              </div>
+            </fieldset>
 
-                  {selected ? (
-                    <select
-                      value={selected.severity}
-                      onChange={(event) =>
-                        setAllergenSeverity(allergen.id, event.target.value)
-                      }
-                      className="rounded-md border border-zinc-300 bg-transparent px-2 py-1 text-sm dark:border-zinc-700"
-                    >
-                      {SEVERITY_LEVELS.map((level) => (
-                        <option key={level.id} value={level.id}>
-                          {level.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            Dietary restrictions
-          </legend>
-          <div className="grid grid-cols-2 gap-2">
-            {DIETARY_RESTRICTIONS.map((restriction) => (
-              <label
-                key={restriction.id}
-                className="flex items-center gap-2 rounded-md border border-zinc-200 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-50"
-              >
-                <input
-                  type="checkbox"
-                  checked={profile.dietary_restrictions.includes(
-                    restriction.id,
-                  )}
-                  onChange={() => toggleDietaryRestriction(restriction.id)}
-                />
-                {restriction.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            Matching strictness
-          </legend>
-          <div className="flex flex-col gap-2">
-            {MATCHING_STRICTNESS_OPTIONS.map((option) => (
-              <label
-                key={option.id}
-                className="flex flex-col gap-1 rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
-              >
-                <span className="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                  <input
-                    type="radio"
-                    name="matching_strictness"
-                    checked={profile.matching_strictness === option.id}
-                    onChange={() => setMatchingStrictness(option.id)}
+            <fieldset className="flex flex-col gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-soft-green text-primary">
+                  <Leaf aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <legend className={`${lora.className} text-xl text-text`}>Dietary restrictions</legend>
+              </div>
+              <p className="pl-[42px] text-sm text-text-secondary">
+                Select dietary preferences that matter to you.
+              </p>
+              <div className="flex flex-wrap gap-2 pl-[42px]">
+                {DIETARY_RESTRICTIONS.map((restriction) => (
+                  <DietaryChip
+                    key={restriction.id}
+                    label={restriction.label}
+                    icon={restriction.icon}
+                    selected={profile.dietary_restrictions.includes(restriction.id)}
+                    onToggle={() => toggleDietaryRestriction(restriction.id)}
                   />
-                  {option.label}
-                </span>
-                <span className="pl-6 text-xs text-zinc-600 dark:text-zinc-400">
-                  {option.description}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+                ))}
+              </div>
+            </fieldset>
 
-        <p className="rounded-md bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          Restaurant ingredients, recipes, preparation procedures, and
-          equipment may change. Results are based on available public
-          information and do not guarantee that a dish is free from
-          allergens or cross-contact. Always confirm ingredients and
-          preparation procedures directly with the restaurant before
-          ordering.
-        </p>
+            <SafetyDisclaimer />
 
-        {errorMessage ? (
-          <p className="text-sm text-red-600 dark:text-red-400">
-            {errorMessage}
-          </p>
-        ) : null}
+            {errorMessage ? <p className="text-sm text-status-allergen-text">{errorMessage}</p> : null}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-md bg-zinc-900 px-4 py-3 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
-        >
-          {saving ? "Saving…" : "Save profile"}
-        </button>
-      </form>
+            <button
+              type="submit"
+              disabled={saving}
+              className="hidden min-h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50 sm:flex"
+            >
+              <Save aria-hidden="true" className="h-4 w-4" />
+              {saving ? "Saving…" : "Save profile"}
+            </button>
+
+            <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card p-4 sm:hidden">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-medium text-white disabled:opacity-50"
+              >
+                <Save aria-hidden="true" className="h-4 w-4" />
+                {saving ? "Saving…" : "Save profile"}
+              </button>
+            </div>
+          </form>
+
+          {userId ? (
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={deleting}
+              className="mx-auto mt-6 flex min-h-11 items-center gap-1.5 text-sm font-medium text-status-allergen-text disabled:opacity-50"
+            >
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
+              {deleting ? "Deleting account…" : "Delete my account"}
+            </button>
+          ) : null}
+        </div>
+      </div>
     </main>
   );
 }

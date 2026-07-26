@@ -1,99 +1,123 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import "leaflet/dist/leaflet.css";
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+// Simple filled-pin marker in the app's primary green, built as an inline
+// SVG data icon — avoids Leaflet's default marker image assets, which
+// don't resolve correctly under Next.js/Turbopack bundling without extra
+// webpack config.
+const PIN_SVG = `
+  <svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22c0-7.73-6.27-14-14-14z" fill="#166534"/>
+    <circle cx="14" cy="14" r="5.5" fill="#ffffff"/>
+  </svg>
+`;
 
-let loaderPromise = null;
-
-// Google Maps' loader is meant to be called once per page — reuse a single
-// in-flight/resolved promise across every mount of this component instead
-// of re-requesting the script.
-function loadGoogleMaps() {
-  if (!loaderPromise) {
-    const loader = new Loader({ apiKey: API_KEY, version: "weekly" });
-    loaderPromise = loader.importLibrary("maps");
-  }
-  return loaderPromise;
-}
-
-// Renders a live Google Map centered on `center` with a marker per
-// restaurant, per plan §6 (client-side rendering only — no restaurant data
-// is fetched from Google, only displayed on top of Google's map tiles).
-// If no API key is configured, this renders a plain-text fallback instead
-// of failing silently — the ranked list above/below it still works either
-// way, so a missing key never blocks using the app.
-export default function RestaurantMap({ center, restaurants }) {
+// Renders a live OpenStreetMap (via Leaflet) centered on `center` with a
+// marker per restaurant, per plan §6 (client-side rendering only — no
+// restaurant data is fetched from a map provider, only displayed on top of
+// its tiles). Free and API-key-free: OpenStreetMap's tile usage policy only
+// requires the on-map attribution Leaflet already shows by default.
+export default function RestaurantMap({ center, restaurants, onSelectRestaurant }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
+  const leafletRef = useRef(null);
   const markersRef = useRef([]);
-  const [loadError, setLoadError] = useState(null);
+  const resizeObserverRef = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    if (!API_KEY) return;
     let cancelled = false;
 
-    loadGoogleMaps()
-      .then(({ Map }) => {
-        if (cancelled || !containerRef.current) return;
-        mapRef.current = new Map(containerRef.current, {
-          center,
-          zoom: 12,
-          mapId: "explore-nearby",
-        });
-      })
-      .catch((error) => {
-        if (!cancelled) setLoadError(error.message);
+    import("leaflet").then((leaflet) => {
+      const L = leaflet.default;
+      if (cancelled || !containerRef.current || mapRef.current) return;
+
+      leafletRef.current = L;
+      mapRef.current = L.map(containerRef.current, {
+        center: [center.lat, center.lng],
+        zoom: 12,
       });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }).addTo(mapRef.current);
+      setMapReady(true);
+
+      // General safety net for legitimate container-size changes (browser
+      // window resize, device rotation) — the parent only mounts this
+      // component once its container is already visible/correctly sized
+      // (see MapPageClient), so this isn't compensating for a hidden mount.
+      resizeObserverRef.current = new ResizeObserver(() => {
+        mapRef.current?.invalidateSize();
+      });
+      resizeObserverRef.current.observe(containerRef.current);
+    });
 
     return () => {
       cancelled = true;
+      resizeObserverRef.current?.disconnect();
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (mapRef.current) {
-      mapRef.current.setCenter(center);
+      mapRef.current.setView([center.lat, center.lng]);
     }
   }, [center]);
 
   useEffect(() => {
-    if (!mapRef.current || !window.google) return;
+    const L = leafletRef.current;
+    if (!mapReady || !mapRef.current || !L) return;
 
-    for (const marker of markersRef.current) marker.setMap(null);
+    for (const marker of markersRef.current) marker.remove();
+    const icon = L.divIcon({
+      html: PIN_SVG,
+      className: "",
+      iconSize: [28, 36],
+      iconAnchor: [14, 36],
+    });
     markersRef.current = restaurants.map((restaurant) => {
-      const marker = new window.google.maps.Marker({
-        map: mapRef.current,
-        position: { lat: restaurant.latitude, lng: restaurant.longitude },
+      const marker = L.marker([restaurant.latitude, restaurant.longitude], {
+        icon,
         title: `${restaurant.name} — score ${restaurant.score}`,
-      });
+      }).addTo(mapRef.current);
+      if (onSelectRestaurant) {
+        marker.on("click", () => onSelectRestaurant(restaurant));
+      }
       return marker;
     });
 
+    // A fixed zoom level doesn't guarantee every marker actually fits in
+    // view — restaurants can be spread out more than a short mobile map
+    // height (or a tight desktop zoom) can show at once. Fit the view to
+    // whatever markers currently exist instead, so nothing renders outside
+    // the visible area. Falls back to just centering when there are none.
+    if (restaurants.length > 0) {
+      const bounds = L.latLngBounds(
+        restaurants.map((r) => [r.latitude, r.longitude]),
+      );
+      mapRef.current.fitBounds(bounds, { padding: [32, 32], maxZoom: 15 });
+    } else {
+      mapRef.current.setView([center.lat, center.lng], 12);
+    }
+
     return () => {
-      for (const marker of markersRef.current) marker.setMap(null);
+      for (const marker of markersRef.current) marker.remove();
     };
-  }, [restaurants]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restaurants, mapReady]);
 
-  if (!API_KEY) {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-500">
-        <p>Interactive map unavailable — no Google Maps API key configured.</p>
-        <p className="text-xs">Results are still ranked in the list below.</p>
-      </div>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-red-300 px-4 text-center text-sm text-red-600 dark:border-red-800 dark:text-red-400">
-        <p>Map failed to load: {loadError}</p>
-        <p className="text-xs">Results are still ranked in the list below.</p>
-      </div>
-    );
-  }
-
-  return <div ref={containerRef} className="h-64 w-full rounded-md" />;
+  return (
+    <div
+      ref={containerRef}
+      className="h-64 w-full overflow-hidden rounded-2xl lg:h-full lg:min-h-[500px]"
+    />
+  );
 }

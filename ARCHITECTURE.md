@@ -2,10 +2,10 @@
 
 ## Overview
 
-A Next.js 16 (App Router) application with Supabase as the database and auth provider, deployed on Vercel. The Google Maps JavaScript API renders the interactive map client-side only. All allergy/dietary matching, evidence classification, and ranking logic runs as deterministic JavaScript functions — not live AI calls — so results are explainable and testable.
+A Next.js 16 (App Router) application with Supabase as the database and auth provider, deployed on Vercel. Leaflet with OpenStreetMap tiles renders the interactive map client-side only — free, no API key or billing account required. All allergy/dietary matching, evidence classification, and ranking logic runs as deterministic JavaScript functions — not live AI calls — so results are explainable and testable.
 
 ```
-Browser (React client components, Google Maps JS API)
+Browser (React client components, Leaflet + OpenStreetMap)
    |
    |  fetch()
    v
@@ -26,9 +26,10 @@ Supabase (Postgres + Auth + Row Level Security)
 
 ## Backend
 
-- Next.js Route Handlers under `/src/app/api/*/route.js` (`search`, `rank`, `favorites`, `reports`). Each exports named async functions per HTTP verb (`GET`, `POST`, ...), reads query params via `request.nextUrl.searchParams`, reads bodies via `await request.json()`, and returns `Response.json(...)`.
-- All allergen classification, scoring, evidence-confidence mapping, and question generation logic lives in plain, dependency-free functions under `/src/lib/` (`classification.js`, `scoring.js`, `evidence.js`, `questions.js`, `search.js`) so it can be unit-tested with Vitest independent of the network/database.
-- Route handlers are thin: fetch data from Supabase, call the pure `/lib` functions, return the result.
+- Next.js Route Handlers under `/src/app/api/*/route.js`: `rank` (POST — Explore Nearby ranking), `search` (POST — Find a Dish), `restaurant/[id]` (POST — restaurant detail), `dish/[id]` (POST — dish detail), `favorites` (GET/POST/DELETE — the first auth-gated route in the app), `account` (DELETE — account deletion). `reports` (community corrections) is a documented stretch feature per the build plan and has no route yet. Each exports named async functions per HTTP verb; the profile-driven routes (`rank`/`search`/`restaurant`/`dish`) take the caller's allergy/dietary profile as a JSON body via `await request.json()` rather than query params, since a profile is a nested object (allergy list with severities, dietary restriction list) that doesn't map cleanly onto a query string; `favorites`' `GET` is the one place query params are used, for a lightweight single-item favorited-or-not check.
+- All allergen classification, scoring, evidence-confidence mapping, question generation, and display-label logic lives in plain, dependency-free functions under `/src/lib/` (`classification.js`, `scoring.js`, `evidence.js`, `questions.js`, `search.js`, `group-dishes.js`, `classification-labels.js`, `evidence-labels.js`, `favorites.js`'s pure half) so it can be unit-tested with Vitest independent of the network/database.
+- Route handlers are thin: fetch data from Supabase (via small server-only helpers under `/src/app/api/_lib/`, kept separate from `/src/lib` since they're not pure), call the pure `/lib` functions, return the result.
+- `/api/account` and `/api/favorites` are the only routes that require authentication — they call `supabase.auth.getUser()` first and return an explicit `401` if there's no session, rather than relying on Row Level Security to fail silently. `/api/account`'s `DELETE` handler is also the only place `src/lib/supabase/admin.js` (the service-role client) is used outside the one-time seed scripts — deleting a Supabase Auth user requires admin privileges, but the route always derives *which* user to delete from the caller's own session, never a client-supplied id.
 
 ## Database (Supabase / Postgres)
 
@@ -48,29 +49,38 @@ Supabase Auth (email/password) for registered accounts. A **guest mode** lets a 
 
 ## Map integration
 
-Google Maps JavaScript API, loaded client-side only, with a browser API key restricted by HTTP referrer and scoped to the Maps JavaScript API alone (see `SECURITY_AND_PRIVACY.md`). The map never calls Google Places/Geocoding APIs live — all restaurant location data is pre-curated and stored in Supabase (see `DATA_SOURCES.md` for why).
+Leaflet, loaded client-side only (`src/components/RestaurantMap.js`), rendering OpenStreetMap raster tiles — free, no API key or billing account, only the on-map attribution OpenStreetMap's tile usage policy requires (which Leaflet shows by default). Restaurant markers are simple inline-SVG pins (no external marker-image assets, which don't resolve cleanly under Turbopack). The map view fits itself to whatever restaurant markers are currently shown (`fitBounds`) rather than a fixed zoom level, so results are never off-screen on a short mobile viewport. The map never calls a live geocoding/places API — all restaurant location data is pre-curated and stored in Supabase (see `DATA_SOURCES.md` for why).
 
 ## Data flow — Explore Nearby
 
 1. User grants geolocation or enters a location manually; selects a radius.
-2. Client requests `/api/rank?lat=...&lng=...&radius=...` (plus the user's profile).
-3. Route handler queries `restaurants` (and joined menu/allergen data) from Supabase within the radius.
+2. Client `POST`s to `/api/rank` with `{ lat, lng, radiusMiles, allergies, dietaryRestrictions, matchingStrictness }`.
+3. Route handler queries `restaurants` (and joined menu/allergen data) from Supabase, then filters to the radius client-side via `/lib/geo.js`'s haversine distance.
 4. For each restaurant, `/lib/classification.js` classifies each menu item against the user's profile and matching strictness; `/lib/scoring.js` aggregates those classifications plus evidence quality and data freshness into a Choice Availability Score with an explanation breakdown.
-5. Results are returned ranked; the client renders map markers and result cards.
+5. Results are returned ranked (distance is a secondary sort only, never a scoring input); the client renders map markers and result cards, each linking to `/restaurant/[id]`.
 
 ## Data flow — Find a Dish
 
 1. User enters a craving (e.g. "spicy fried rice").
-2. `/lib/search.js` deterministically expands the query (normalization, synonym dictionary, cuisine tags, Postgres trigram/full-text similarity) to find exact and related dish name matches.
-3. Matches are filtered/classified against the user's profile the same way as Explore Nearby, then ranked by a combination of craving relevance and compatibility.
+2. Client `POST`s to `/api/search` with the same shape as `/api/rank` plus `{ query }`.
+3. `/lib/search.js` deterministically expands the query (normalization, synonym dictionary, in-process trigram similarity) to find exact and related dish name matches across every restaurant within the radius.
+4. Matches are classified against the user's profile the same way as Explore Nearby, then ranked by a combination of craving relevance and compatibility; each result links to `/dish/[id]`.
+
+## Data flow — restaurant/dish detail
+
+`/restaurant/[id]` and `/dish/[id]` follow the same page/client-component split as `/map` (a thin `page.js` server wrapper awaiting the route's `params`, plus a `"use client"` component that loads the caller's profile and `POST`s it to the matching API route). `/api/restaurant/[id]` re-runs `classifyDish`/`scoreRestaurant` over just that restaurant's menu and returns a full per-dish breakdown grouped by category (`/lib/group-dishes.js`) client-side. `/api/dish/[id]` goes further than the restaurant route: alongside the personalized classification, it returns every raw evidence row for that dish (all documented allergens/dietary attributes/modifications/cross-contact notes, not just the ones the caller's profile touches) so the page can be fully transparent, plus `/lib/questions.js`'s generated staff questions for whatever gaps remain in the evidence.
 
 ## Ranking flow
 
 Documented in full in the build plan (`§9`); implemented in `/lib/scoring.js`, unit-tested in `tests/scoring.test.js`. The score and its plain-language explanation are computed together — the UI never shows a bare number.
 
+## Favorites
+
+`favorites.user_id` is `NOT NULL` in the schema, so a favorites row cannot exist without a signed-in user. Guest favorites are therefore entirely client-side (`localStorage`, mirroring the guest-profile pattern in `/lib/profile.js`) and never touch the server; signed-in favorites go through `/api/favorites`. Since `favorites.target_id` has no foreign key to `restaurants`/`menu_items` (disambiguated only by `target_type`), listing a user's favorites with real names requires a second lookup query merged back in by id (`/lib/favorites.js`'s `mergeFavoritesWithTargets`), not an automatic Supabase join.
+
 ## External APIs
 
-- **Google Maps JavaScript API** — client-side map rendering only (see above).
+- **OpenStreetMap** (via Leaflet) — client-side map rendering only (see above).
 - **Supabase** — database + auth, accessed via `@supabase/supabase-js` (browser, anon key + RLS) and `@supabase/ssr` (server-side session handling).
 
 ## Deployment

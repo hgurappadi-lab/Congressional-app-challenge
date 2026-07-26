@@ -1,4 +1,4 @@
-# [App Name TBD] — Allergy-Aware Food Discovery
+# ClearPlate — Allergy-Aware Food Discovery
 
 A 2026 Congressional App Challenge submission.
 
@@ -31,7 +31,7 @@ People managing food allergies or dietary restrictions (and their families) sear
 - **Framework:** Next.js 16 (App Router), JavaScript
 - **Styling:** Tailwind CSS 4
 - **Database / Auth:** Supabase (Postgres, Auth, Row Level Security)
-- **Map:** Google Maps JavaScript API (client-side rendering only)
+- **Map:** Leaflet + OpenStreetMap (client-side rendering only, free, no API key)
 - **Testing:** Vitest
 - **Deployment:** Vercel + Supabase
 - **AI development assistant:** Claude (see `AI_USAGE.md`)
@@ -80,7 +80,12 @@ Deployed on Vercel from the production branch of this repository, with the datab
 
 ## Screenshots
 
-_To be added once the core screens are built._
+| | |
+|---|---|
+| ![Welcome screen](docs/screenshots/01-welcome.png) | ![Allergy/dietary profile screen](docs/screenshots/02-profile.png) |
+| ![Explore Nearby with ranked results](docs/screenshots/03-explore-nearby.png) | ![Restaurant detail with Choice Availability Score](docs/screenshots/04-restaurant-detail.png) |
+| ![Dish detail with per-allergen evidence and generated questions](docs/screenshots/05-dish-detail.png) | ![Find a Dish craving search](docs/screenshots/06-find-a-dish.png) |
+| ![Favorites page](docs/screenshots/07-favorites.png) | |
 
 ## Project structure
 
@@ -92,6 +97,7 @@ _To be added once the core screens are built._
 /scripts        One-time data-seeding scripts
 /data/seed      Curated restaurant/menu source data
 /tests          Vitest unit tests
+/docs/screenshots  README screenshots
 ```
 
 ## Known limitations
