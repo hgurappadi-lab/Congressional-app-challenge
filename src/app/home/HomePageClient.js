@@ -15,7 +15,9 @@ import {
   Leaf,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { hasGuestProfile } from "@/lib/profile";
 import ProfileShortcut from "@/components/ProfileShortcut";
+import WelcomeModal from "@/components/WelcomeModal";
 
 const NAV_LINKS = [
   { href: "/home", label: "Home" },
@@ -88,6 +90,7 @@ function ActionCard({ href, icon: Icon, title, description, illustration }) {
 export default function HomePageClient() {
   const [user, setUser] = useState(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,6 +102,7 @@ export default function HomePageClient() {
       if (cancelled) return;
       setUser(loadedUser);
       setCheckedAuth(true);
+      setShowWelcome(!loadedUser && !hasGuestProfile());
     }
     load();
     return () => {
@@ -108,6 +112,11 @@ export default function HomePageClient() {
 
   return (
     <main className="relative flex-1 bg-page">
+      {showWelcome ? <WelcomeModal /> : null}
+      <div
+        aria-hidden={showWelcome || undefined}
+        className={showWelcome ? "pointer-events-none select-none blur-sm" : undefined}
+      >
       <section className="relative flex min-h-[560px] flex-col overflow-hidden bg-[#0d140f] sm:min-h-[640px]">
         <div className="absolute inset-0 overflow-hidden">
           <Image
@@ -259,6 +268,7 @@ export default function HomePageClient() {
             )}
           </div>
         ) : null}
+      </div>
       </div>
     </main>
   );

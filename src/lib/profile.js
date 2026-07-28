@@ -23,6 +23,15 @@ export function emptyProfile() {
   };
 }
 
+// Whether a guest has ever saved a profile on this device — distinct from
+// the profile's *contents*, since an empty allergies/restrictions list is a
+// valid saved profile (someone with no allergies). Used to decide whether
+// the welcome popup still needs to be shown.
+export function hasGuestProfile() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(GUEST_PROFILE_KEY) !== null;
+}
+
 export function loadGuestProfile() {
   if (typeof window === "undefined") return emptyProfile();
 

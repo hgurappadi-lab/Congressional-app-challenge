@@ -96,6 +96,12 @@ export default function ProfilePage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (profile.allergies.length === 0 && profile.dietary_restrictions.length === 0) {
+      setErrorMessage("Select at least one allergy or dietary restriction to continue.");
+      return;
+    }
+
     setSaving(true);
     setErrorMessage("");
 
@@ -127,7 +133,7 @@ export default function ProfilePage() {
         const body = await response.json().catch(() => ({}));
         throw new Error(body.error || `Request failed (${response.status}).`);
       }
-      router.push("/welcome");
+      router.push("/home");
     } catch (error) {
       setErrorMessage(error.message);
       setDeleting(false);
@@ -141,6 +147,8 @@ export default function ProfilePage() {
       </main>
     );
   }
+
+  const hasSelection = profile.allergies.length > 0 || profile.dietary_restrictions.length > 0;
 
   return (
     <main className="relative flex-1 overflow-hidden bg-gradient-to-br from-pale-green via-page to-page px-4 py-8 sm:px-6 sm:py-10">
@@ -238,7 +246,7 @@ export default function ProfilePage() {
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || !hasSelection}
               className="hidden min-h-11 items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50 sm:flex"
             >
               <Save aria-hidden="true" className="h-4 w-4" />
@@ -248,7 +256,7 @@ export default function ProfilePage() {
             <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-card p-4 sm:hidden">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !hasSelection}
                 className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-sm font-medium text-white disabled:opacity-50"
               >
                 <Save aria-hidden="true" className="h-4 w-4" />
