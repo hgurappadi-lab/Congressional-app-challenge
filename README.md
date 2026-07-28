@@ -76,7 +76,7 @@ node scripts/seed-menu-data.js
 
 ## Deployment
 
-Deployed on Vercel from the production branch of this repository, with the database/auth hosted on Supabase. Live URL: _TBD_. A guest/demo mode means judges do not need credentials to evaluate the app.
+Deployed on Vercel from the production branch of this repository, with the database/auth hosted on Supabase. Live URL: https://congressional-app-challenge-green.vercel.app. A guest/demo mode means judges do not need credentials to evaluate the app.
 
 ## Screenshots
 
