@@ -363,7 +363,7 @@
     "source_type": "official_restaurant_website",
     "data_collected_at": "2026-07-21",
     "last_checked_at": "2026-07-21",
-    "notes": "~14.2 miles from the reference point \u2014 near the outer edge of the dataset's 15-mile radius, so it only appears when a 15 mi search radius is selected. All-vegetarian Thai kitchen; every dish is vegetarian or vegan by house policy, which is why dietary_attributes below skew favorable, but the restaurant's own site is explicit that the kitchen is not gluten-free.",
+    "notes": "~14.2 miles from the reference point — near the outer edge of the dataset's 15-mile radius, so it only appears when a 15 mi search radius is selected. All-vegetarian Thai kitchen; every dish is vegetarian or vegan by house policy, which is why dietary_attributes below skew favorable, but the restaurant's own site is explicit that the kitchen is not gluten-free.",
     "cross_contact_notes": [
       {
         "cross_contact_type": "shared_kitchen_not_gluten_free",
@@ -374,5 +374,136 @@
         "last_verified_at": "2026-07-21"
       }
     ]
+  },
+  {
+    "id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "HiroNori Craft Ramen",
+    "address": "9254 Scranton Rd Suite 102, San Diego, CA 92121",
+    "latitude": 32.8911174,
+    "longitude": -117.2017209,
+    "cuisine": "Japanese (Ramen)",
+    "price_level": 2,
+    "hours": null,
+    "phone": "(858) 230-6463",
+    "website": "https://hironori.com/san-diego-sorrento-valley",
+    "source_url": "https://hironori.com/our-craft-ramen",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "location_note": "This Sorrento Valley location opened in fall 2025 per SanDiegoVille coverage; confirmed as an active, currently-operating location via the restaurant's own site (\"Now Open\") and Yelp."
+  },
+  {
+    "id": "a149a18b-c572-4f49-b73d-8665db1c4959",
+    "name": "Phil's BBQ - Rancho Bernardo",
+    "address": "17051 W Bernardo Dr, San Diego, CA 92127",
+    "latitude": 33.024324,
+    "longitude": -117.080914,
+    "cuisine": "American BBQ",
+    "price_level": 2,
+    "hours": {
+      "sun_thu": "11:00am-9:00pm",
+      "fri_sat": "11:00am-10:00pm"
+    },
+    "phone": "(858) 312-6161",
+    "website": "https://philsbbq.com/",
+    "source_url": "https://philsbbq.com/san-diego-point-loma-phils-bbq-food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03"
+  },
+  {
+    "id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Poke Chop",
+    "address": "1404 Garnet Ave, San Diego, CA 92109",
+    "latitude": 32.7990969,
+    "longitude": -117.2443448,
+    "cuisine": "Poke / Hawaiian",
+    "price_level": 2,
+    "hours": {
+      "daily": "11:00am-9:00pm"
+    },
+    "phone": "(858) 225-8875",
+    "website": "https://pokechopsd.com",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03"
+  },
+  {
+    "id": "66c58a94-34cf-4f8a-b71b-9c690b5bdcc1",
+    "name": "Kusina San Diego",
+    "address": "7580 Miramar Rd, San Diego, CA 92126",
+    "latitude": 32.886515,
+    "longitude": -117.152675,
+    "cuisine": "Filipino",
+    "price_level": 2,
+    "hours": {
+      "mon": "closed",
+      "tue_sat": "11:00am-3:00pm, 5:00pm-8:00pm",
+      "sun": "9:00am-3:00pm"
+    },
+    "phone": "(858) 868-5021",
+    "website": "https://kusinasd.com/",
+    "source_url": "https://kusinasd.com/food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03"
+  },
+  {
+    "id": "ba32cf2c-cab2-4ff5-8c47-7f184796eb09",
+    "name": "Spiro's Mediterranean Cuisine",
+    "address": "909 Prospect St Ste 100B, La Jolla, CA 92037",
+    "latitude": 32.8463997,
+    "longitude": -117.2752059,
+    "cuisine": "Greek / Mediterranean",
+    "price_level": 3,
+    "hours": null,
+    "phone": "(858) 203-3360",
+    "website": "https://www.spiroscuisineca.com/la-jolla-menu",
+    "source_url": "https://www.spiroscuisineca.com/",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "location_note": "Coordinates geocoded to the 909 Prospect St building (same address, different tenant business used as geocoding anchor); should be accurate to the building but not necessarily the exact suite. Hours listed only Mon-Fri on available sources; weekend hours not confidently found so hours is left null."
+  },
+  {
+    "id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Emerald Chinese Cuisine",
+    "address": "3709 Convoy St Ste 101, San Diego, CA 92111",
+    "latitude": 32.81137,
+    "longitude": -117.152853,
+    "cuisine": "Chinese (Cantonese/Dim Sum)",
+    "price_level": 3,
+    "hours": {
+      "sun": "9:00am-9:00pm",
+      "mon_fri": "10:30am-9:00pm",
+      "sat": "9:00am-9:00pm"
+    },
+    "phone": "(858) 565-6888",
+    "website": "https://emeraldchinesecuisineca.com/",
+    "source_url": "https://www.yelp.com/biz/emerald-chinese-cuisine-san-diego",
+    "source_type": "third_party_aggregator_yelp",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "location_note": "A long-standing Kearny Mesa Cantonese seafood/dim sum institution on Convoy St since the early 2000s; multiple 2025-2026 reviews confirm it is currently operating."
+  },
+  {
+    "id": "23700030-e8b8-4bea-8074-590c157350e9",
+    "name": "Spices Thai Kitchen",
+    "address": "3810 Valley Centre Dr, Suite 903, San Diego, CA 92130",
+    "latitude": 32.9384411,
+    "longitude": -117.230391,
+    "cuisine": "Thai",
+    "price_level": 2,
+    "hours": {
+      "daily": "11:00am-2:45pm, 5:00pm-8:45pm"
+    },
+    "phone": "(858) 259-0889",
+    "website": "https://www.spicesthaikitchendelmar.com/",
+    "source_url": "https://fisherman-static.s3.amazonaws.com/public/spicesthaikitchendelmar/Menu_u4qujUn.pdf",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "location_note": "Coordinates geocoded via OpenStreetMap Nominatim against the exact street address (building-level match, not a zip-centroid fallback). In business since 1994 per the restaurant's own site (\"A Del Mar Institution, Thirty Years Strong\"); 652 Yelp reviews as of July 2026 confirm it is currently operating."
   }
 ]

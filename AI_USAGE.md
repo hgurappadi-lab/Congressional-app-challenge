@@ -417,3 +417,39 @@ Claude also read the Next.js 16 docs bundled in `node_modules/next/dist/docs/` b
 **What I learned:** [Fill in.]
 
 **Retained/modified/discarded:** All retained.
+
+---
+
+## 2026-08-03 — Find a Dish ranking bug and cuisine-diversity dataset expansion
+
+**Tool:** Claude (Sonnet 5, via Claude Code)
+
+**Purpose:** The user reported that searching "spicy fried rice" on the live site surfaced "True Crisp'd Air Fried French Fries" as the top "Best match," with the two actual fried-rice dishes in the dataset nowhere near the top. Their initial theory was that the dataset just needed more restaurants/cuisines to match against.
+
+**Assistance provided:** Before acting on that theory, ran the actual `searchMenuItems()` text-relevance function directly against the dataset and found it already ranked the real fried-rice dishes highest on pure text relevance — so the bug wasn't a data gap, it was in `/api/search/route.js`'s final ranking. `combinedScore` there was `relevance*0.5 + compatibilityWeight*0.5` (additive): True Food Kitchen's fries have every one of 9 allergens marked `restaurant_disclosed_absent` at high confidence, so they always score a perfect 1.0 compatibility for any allergy profile, while the fried-rice dishes' sparser evidence caps them at 0.2–0.4 — enough for the well-documented-but-irrelevant fries (relevance 0.12) to outscore the on-topic dishes (relevance 0.45) for essentially any allergy selection. Presented this finding plus a fix (change to `relevance*(0.5 + 0.5*compatibility)`, multiplicative — compatibility can no longer promote a near-zero-relevance dish to the top, but still reorders dishes of similar relevance by safety) via AskUserQuestion; the user chose to do both the ranking fix and the dataset expansion. Verified the fix with a scratch vitest script simulating the real route logic against the live dataset for multiple allergy profiles before/after (deleted after use, not committed). Then added 6 real, currently-open San Diego-area restaurants chosen specifically to fill cuisine gaps that were producing dead-end searches (no "ramen," "poke," or "gyro" results existed at all before this): HiroNori Craft Ramen, Phil's BBQ - Rancho Bernardo, Poke Chop, Kusina San Diego (Filipino), Spiro's Mediterranean Cuisine (Greek), and Emerald Chinese Cuisine (Cantonese/dim sum, including a real Shrimp Fried Rice item) — full sourcing detail per restaurant in `DATA_SOURCES.md`. While verifying, also found and fixed that Poke Chop's own bowls didn't say "poke" anywhere, so a literal "poke" search returned zero results despite the restaurant existing — relabeled its 4 poke-bowl items' `category` field from generic `"bowl"` to `"poke bowl"` (a factually accurate categorization, not a change to the sourced menu description text).
+
+**My contribution:** [Fill in as you review — e.g. whether the multiplicative formula is the right long-term fix, or a different rebalancing.]
+
+**Tested:** `npm test` (96/96 passing, unaffected — algorithm change has no dedicated unit test yet), `npm run lint` clean. Verified via scratch vitest scripts (not committed) that "spicy fried rice," "ramen," "poke," and "gyro" all now surface relevant dishes at or near the top for a sample allergy profile, both before/after comparisons for the ranking fix and a final check against the full 27-restaurant dataset. Not yet re-seeded to Supabase or pushed — the user explicitly asked to review the data changes first before they go live.
+
+**What I learned:** [Fill in.]
+
+**Retained/modified/discarded:** All retained, pending user review.
+
+---
+
+## 2026-08-03 — One more Thai restaurant
+
+**Tool:** Claude (Sonnet 5, via Claude Code)
+
+**Purpose:** Follow-up to the ranking/dataset session above — the user asked for one more restaurant, specifically Thai.
+
+**Assistance provided:** Researched Spices Thai Kitchen (3810 Valley Centre Dr, Carmel Valley) — operating since 1994, 652 Yelp reviews as of July 2026 confirming it's still open, ~3.9 mi from the reference point. Found its full official PDF menu on its own site (`spicesthaikitchendelmar.com`) and added 4 items with real prices and descriptions: Pad Thai Noodles (Chicken), Thai Fried Rice (Tofu), Green Curry (Chicken), and Thai Spring Rolls. For the Green Curry's coconut-based sauce, checked how the existing dataset handled the same situation (Spoon Thai Kitchen's Panang Curry, also coconut-based) before writing anything — that item correctly leaves both `milk` and `tree_nuts` as `unknown`/`insufficient` rather than treating coconut milk as a dairy allergen, since coconut isn't dairy and isn't reliably a tree-nut cross-reactor either; matched that same convention here instead of inventing a new one. Coordinates came from OpenStreetMap Nominatim geocoding the exact street address (building-level match), the same method used earlier in this session for Spiro's Mediterranean Cuisine, with a `location_note` disclosing it.
+
+**My contribution:** [Fill in as you review.]
+
+**Tested:** `npm test` (96/96), `npm run lint` clean, referential integrity confirmed (every menu item's `restaurant_id` resolves to a real restaurant). Not yet re-seeded to Supabase or pushed.
+
+**What I learned:** [Fill in.]
+
+**Retained/modified/discarded:** All retained, pending user review.

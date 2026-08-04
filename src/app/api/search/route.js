@@ -7,9 +7,12 @@ import { fetchRestaurantsWithEvidence } from "../_lib/restaurants";
 
 // A dish's overall ranking is a mix of how well it matches the craving and
 // how compatible it looks for this profile (ARCHITECTURE.md's Find a Dish
-// flow). Neither dominates: a great craving match that's flagged as
-// containing an allergen should still rank below a good-but-imperfect
-// match that's a strong documented compatibility fit.
+// flow). A great craving match that's flagged as containing an allergen
+// still ranks below a good-but-imperfect match that's a strong documented
+// compatibility fit — but compatibility scales relevance rather than
+// competing with it independently, so a dish that barely matches the
+// craving at all can't win purely by being extremely well-documented as
+// safe (see combinedScore below).
 const COMPATIBILITY_WEIGHT = {
   strong_documented_potential_match: 1,
   modification_needed: 0.7,
@@ -98,7 +101,12 @@ export async function POST(request) {
       });
 
       const compatibilityWeight = COMPATIBILITY_WEIGHT[result.classification] ?? 0;
-      const combinedScore = item.relevance * 0.5 + compatibilityWeight * 0.5;
+      // Compatibility scales relevance rather than adding to it independently
+      // — a dish that barely matches the craving (near-zero relevance) can't
+      // be boosted to the top purely because it's extremely well-documented
+      // as safe. Among dishes that already match the craving reasonably
+      // well, compatibility still meaningfully reorders them, same as before.
+      const combinedScore = item.relevance * (0.5 + 0.5 * compatibilityWeight);
 
       return {
         id: item.id,

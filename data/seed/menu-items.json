@@ -4790,7 +4790,7 @@
   {
     "id": "589e4aa0-b296-4eb6-ad3f-2f37a24e8984",
     "restaurant_id": "ae66c005-ed58-4c56-b461-ca6adfd3deaa",
-    "name": "Ph\u1edf Ca Dao Special",
+    "name": "Phở Ca Dao Special",
     "description": "Beef pho with a combination of cuts, in a slow-simmered broth.",
     "price": 17.8,
     "category": "noodles",
@@ -6040,7 +6040,7 @@
     "id": "d2c6c308-8095-42d8-a0aa-6ca37a69fe41",
     "restaurant_id": "3c6a85f8-679e-4548-b4e3-4c5aafa430cd",
     "name": "Salt & Pepper Chicken Wings",
-    "description": "Fried chicken wings tossed with salt, pepper, and jalape\u00f1o.",
+    "description": "Fried chicken wings tossed with salt, pepper, and jalapeño.",
     "price": null,
     "category": "appetizer",
     "source_url": "https://www.szechuanhouseca.com/",
@@ -7369,7 +7369,7 @@
         "assessment": "restaurant_disclosed_absent",
         "evidence_source": "official_allergen_guide",
         "confidence": "high",
-        "evidence_note": "Built with no cheese and no sour cream \u2014 Chipotle's only dairy-containing ingredients per its official statement."
+        "evidence_note": "Built with no cheese and no sour cream — Chipotle's only dairy-containing ingredients per its official statement."
       },
       {
         "allergen": "wheat",
@@ -7452,6 +7452,1006 @@
         "evidence_source": "official_allergen_guide",
         "confidence": "medium",
         "last_verified_at": "2026-07-23"
+      }
+    ]
+  },
+  {
+    "id": "4a46a4c9-5a2e-4465-84f4-edaee2a8e6c6",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Shrimp Fried Rice",
+    "description": "Fried rice with jumbo shrimp (menu code RN15).",
+    "price": 38.95,
+    "category": "rice",
+    "source_url": "https://www.yelp.com/menu/emerald-chinese-cuisine-san-diego",
+    "source_type": "third_party_aggregator_yelp",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "shellfish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists jumbo shrimp as the featured protein."
+      },
+      {
+        "allergen": "eggs",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Chinese-restaurant fried rice is very commonly made with scrambled egg, but the menu listing does not explicitly confirm egg is used in this preparation."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Soy sauce is a standard seasoning in Cantonese-style fried rice, but this is inferred from typical preparation, not an explicit ingredient statement."
+      }
+    ]
+  },
+  {
+    "id": "347bae46-1562-49fb-a027-9b7fad3d3145",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Kung Pao Chicken",
+    "description": "Classic spicy stir-fried chicken with peanuts and dried chilies (menu code CS4).",
+    "price": 32.95,
+    "category": "entree",
+    "source_url": "https://www.yelp.com/menu/emerald-chinese-cuisine-san-diego",
+    "source_type": "third_party_aggregator_yelp",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "peanuts",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "high",
+        "evidence_note": "Kung Pao chicken is a named classic dish whose defining ingredient is whole roasted peanuts; the menu description itself flags this as the peanut dish."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Kung Pao sauce is traditionally soy-sauce based; inferred from standard recipe, not an explicit restaurant ingredient statement."
+      }
+    ]
+  },
+  {
+    "id": "af798a55-5611-4ec7-a1be-f14c0efe8699",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Salt & Pepper Shrimp (No Shell)",
+    "description": "Jumbo shrimp, shell removed, wok-fried with salt and pepper, spicy (menu code SF4).",
+    "price": 42.95,
+    "category": "entree",
+    "source_url": "https://www.yelp.com/menu/emerald-chinese-cuisine-san-diego",
+    "source_type": "third_party_aggregator_yelp",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "shellfish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly names shrimp as the dish's ingredient."
+      }
+    ]
+  },
+  {
+    "id": "4c53f939-27a5-4315-b507-ed9cdd97f4dd",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Tonkotsu Ramen",
+    "description": "24-hour pork bone broth with artisan noodles, bean sprouts, green onion, spinach, half egg, seaweed, wood ear mushrooms, and pork chashu.",
+    "price": null,
+    "category": "noodles",
+    "source_url": "https://hironori.com/our-craft-ramen",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists a half egg topping."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Ramen noodles are wheat-based, and the dish is explicitly described as using 'artisan noodles.'"
+      },
+      {
+        "allergen": "gluten",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Wheat ramen noodles contain gluten."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Tonkotsu broth seasoning (tare) is commonly soy-based, but the general menu description does not explicitly confirm this for this specific bowl."
+      }
+    ]
+  },
+  {
+    "id": "c3a5ae16-0f6c-4d45-aef7-425a5855c218",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Shoyu Ramen",
+    "description": "Chicken and pork bone broth with soy sauce, artisan noodles, spinach, bamboo, green onions, kaiware sprouts, half egg, and pork chashu.",
+    "price": null,
+    "category": "noodles",
+    "source_url": "https://hironori.com/our-craft-ramen",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "soy",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly states the broth is seasoned with soy sauce."
+      },
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists a half egg topping."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Dish uses wheat-based artisan ramen noodles."
+      },
+      {
+        "allergen": "gluten",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Wheat ramen noodles and soy sauce broth both indicate gluten content."
+      }
+    ]
+  },
+  {
+    "id": "aff19c72-b92b-42da-a65a-65ebc4edb0ac",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Vegan Ramen",
+    "description": "100% vegan sesame miso broth (five Japanese miso varieties), artisan noodles, broccolini, tofu, corn, bean sprouts, baby kale, chili oil.",
+    "price": null,
+    "category": "noodles",
+    "source_url": "https://hironori.com/our-craft-ramen",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "soy",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists a miso (fermented soybean) broth and tofu, both soy-based."
+      },
+      {
+        "allergen": "sesame",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly describes the broth as 'sesame miso.'"
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Dish uses wheat-based artisan ramen noodles."
+      },
+      {
+        "allergen": "gluten",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Wheat ramen noodles contain gluten; standard miso paste can also contain barley/wheat koji depending on variety."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegan",
+        "status": "restaurant_confirmed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      },
+      {
+        "attribute": "vegetarian",
+        "status": "restaurant_confirmed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "985708fe-427b-4ff6-965b-e827c0baf107",
+    "restaurant_id": "66c58a94-34cf-4f8a-b71b-9c690b5bdcc1",
+    "name": "Beef Kare Kare",
+    "description": "Filipino oxtail/beef stew in a rich peanut sauce with vegetables.",
+    "price": 24.0,
+    "category": "entree",
+    "source_url": "https://kusinasd.com/food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "peanuts",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Kare-Kare is a classically peanut-sauce-based Filipino stew; the restaurant's short menu listing does not itemize the sauce ingredients, but a peanut sauce base is standard for this named dish."
+      },
+      {
+        "allergen": "shellfish",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Kare-Kare is traditionally served with bagoong (fermented shrimp paste) as a condiment, but this is inferred from the traditional dish, not confirmed on the restaurant's menu listing."
+      }
+    ]
+  },
+  {
+    "id": "656556d9-e381-44d3-9c29-a51567e4b27f",
+    "restaurant_id": "66c58a94-34cf-4f8a-b71b-9c690b5bdcc1",
+    "name": "Lumpia",
+    "description": "Filipino fried spring rolls.",
+    "price": 9.0,
+    "category": "appetizer",
+    "source_url": "https://kusinasd.com/food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Lumpia wrappers are typically made from wheat flour, but the restaurant's menu listing does not itemize the wrapper ingredients."
+      },
+      {
+        "allergen": "gluten",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Wheat-flour spring roll wrappers would contain gluten if used; inferred, not confirmed."
+      }
+    ]
+  },
+  {
+    "id": "62055c25-296b-48f7-ab9f-8e9a6c25cba7",
+    "restaurant_id": "66c58a94-34cf-4f8a-b71b-9c690b5bdcc1",
+    "name": "Sizzling Sisig",
+    "description": "Filipino sizzling-plate dish of chopped seasoned pork.",
+    "price": 19.0,
+    "category": "entree",
+    "source_url": "https://kusinasd.com/food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Sisig is very commonly topped with a raw or fried egg mixed in at the table, but the restaurant's brief menu listing does not confirm whether egg is included in this version."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Sisig is typically seasoned with soy sauce and calamansi, but this is inferred from the traditional recipe, not an explicit restaurant ingredient statement."
+      }
+    ]
+  },
+  {
+    "id": "45723dd7-73ee-45f3-b2e8-72d666d80579",
+    "restaurant_id": "a149a18b-c572-4f49-b73d-8665db1c4959",
+    "name": "Baby Back Rib Dinner",
+    "description": "Mesquite-grilled baby back ribs, Phil's signature BBQ dish, served with choice of sides.",
+    "price": 13.99,
+    "category": "bbq",
+    "source_url": "https://philsbbq.com/san-diego-point-loma-phils-bbq-food-menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "insufficient",
+        "evidence_note": "BBQ sauces commonly contain soy-derived ingredients, but Phil's exact sauce recipe is not published; treat as unconfirmed."
+      }
+    ]
+  },
+  {
+    "id": "8e908baa-3c9a-4db0-93c3-3d3fdce61529",
+    "restaurant_id": "a149a18b-c572-4f49-b73d-8665db1c4959",
+    "name": "BBQ Garden Veggie Burger",
+    "description": "Grilled BBQ veggie burger patty served on a bun.",
+    "price": null,
+    "category": "sandwich",
+    "source_url": "https://www.yelp.com/biz/phils-bbq-san-diego-14",
+    "source_type": "third_party_aggregator_yelp",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Served on a standard burger bun, which is typically wheat-based, though not explicitly confirmed by the restaurant."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Commercial veggie burger patties frequently use soy protein as a base, but the specific patty ingredients are not published."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "possible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "d9c0688d-0148-431b-9b2d-c7a1c3ebe8dd",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "The Chopper Bowl",
+    "description": "Premium yellowtail, seared albacore, salmon, tuna. Sauce: sweet sesame, jalapeno wasabi, and spicy mayo.",
+    "price": 21.0,
+    "category": "poke bowl",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "fish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Yellowtail, albacore, salmon, and tuna are all explicitly listed."
+      },
+      {
+        "allergen": "sesame",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "'Sweet sesame' sauce is explicitly listed."
+      },
+      {
+        "allergen": "eggs",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "'Spicy mayo' typically contains egg-based mayonnaise, though not explicitly confirmed by the source."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Wasabi and poke-style sauces commonly include soy sauce, but not explicitly confirmed by the source."
+      }
+    ]
+  },
+  {
+    "id": "6f9e0d3a-c753-468f-80fc-4e5205a1756b",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Dyno-sea Bomb Bowl",
+    "description": "Salmon, scallop, and shrimp with garlic pepper aioli and sweet sesame, jalapenos, green onions, nori, crispy garlic.",
+    "price": 18.25,
+    "category": "poke bowl",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "fish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Salmon is explicitly listed."
+      },
+      {
+        "allergen": "shellfish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Scallop and shrimp are explicitly listed."
+      },
+      {
+        "allergen": "sesame",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "'Sweet sesame' sauce is explicitly listed."
+      },
+      {
+        "allergen": "eggs",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Aioli is conventionally egg-based, though not explicitly confirmed by the source."
+      }
+    ]
+  },
+  {
+    "id": "b3b760de-b642-4240-b67b-982573485bbd",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Fried Gyoza",
+    "description": "5-piece potstickers with vegetable and pork.",
+    "price": 5.0,
+    "category": "appetizer",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "high",
+        "evidence_note": "Gyoza/potsticker wrappers are almost universally made from wheat flour dough, though the source does not explicitly state the wrapper ingredients."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Gyoza is commonly served with a soy-based dipping sauce, but not explicitly confirmed by the source."
+      }
+    ]
+  },
+  {
+    "id": "66c96d90-4179-4590-a2e2-4592dc0a5fb9",
+    "restaurant_id": "ba32cf2c-cab2-4ff5-8c47-7f184796eb09",
+    "name": "Chicken Gyro Platter",
+    "description": "Chicken gyro platter.",
+    "price": 26.95,
+    "category": "entree",
+    "source_url": "https://www.doordash.com/store/spiros-mediterranean-cuisine-23652481/",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "A 'gyro' by definition is served wrapped in pita bread, though the source did not provide a detailed ingredient list."
+      },
+      {
+        "allergen": "milk",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Greek gyro platters are commonly served with tzatziki (yogurt-based) sauce, but this was not explicitly confirmed by the source for this specific dish."
+      }
+    ]
+  },
+  {
+    "id": "dbd15cee-0848-4ab2-99a1-5984d645a298",
+    "restaurant_id": "ba32cf2c-cab2-4ff5-8c47-7f184796eb09",
+    "name": "Spiro's Signature Beef Kabob Platter",
+    "description": "Beef kabob platter.",
+    "price": 35.85,
+    "category": "entree",
+    "source_url": "https://www.doordash.com/store/spiros-mediterranean-cuisine-23652481/",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "unknown",
+        "evidence_source": "unknown",
+        "confidence": "insufficient",
+        "evidence_note": "No detailed ingredient list or description was available beyond the dish name and price; Mediterranean kabob platters are often served with pita/rice but this is not confirmed for this specific dish."
+      }
+    ]
+  },
+  {
+    "id": "a13115cf-b4c0-4f8c-9640-9b9c99289be9",
+    "restaurant_id": "ba32cf2c-cab2-4ff5-8c47-7f184796eb09",
+    "name": "Greek Salad",
+    "description": "Greek salad.",
+    "price": 18.55,
+    "category": "salad",
+    "source_url": "https://www.doordash.com/store/spiros-mediterranean-cuisine-23652481/",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "milk",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Greek salads conventionally include feta cheese, though the source did not provide an explicit ingredient list for this dish."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "possible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "db6d8a2e-6010-415e-a1ab-e1b806a41abb",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Roasted Duck",
+    "description": "BBQ-style roasted duck.",
+    "price": 17.95,
+    "category": "bbq",
+    "source_url": "https://www.beyondmenu.com/55201/san-diego/emerald-chinese-cuisine-san-diego-92111.aspx",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": []
+  },
+  {
+    "id": "7ffc1bea-a0c1-4bb6-870c-e594f59cc491",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Ma Po Tofu",
+    "description": "Silken tofu braised in a spicy Szechuan sauce.",
+    "price": 15.95,
+    "category": "entree",
+    "source_url": "https://www.beyondmenu.com/55201/san-diego/emerald-chinese-cuisine-san-diego-92111.aspx",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "soy",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Tofu is the primary named ingredient, which is soy-based."
+      }
+    ]
+  },
+  {
+    "id": "f01f71b3-3428-4b76-a3ae-20b5a0eeed13",
+    "restaurant_id": "1dffc898-554a-4c83-9396-c3d8f189b210",
+    "name": "Steamed Shrimp Dumplings",
+    "description": "Dim sum steamed shrimp dumplings (Har Gow-style).",
+    "price": 7.98,
+    "category": "appetizer",
+    "source_url": "https://www.beyondmenu.com/55201/san-diego/emerald-chinese-cuisine-san-diego-92111.aspx",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "shellfish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "high",
+        "evidence_note": "Shrimp is the named filling ingredient."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Traditional har gow wrappers use wheat starch blended with tapioca starch; not confirmed for this kitchen's recipe."
+      }
+    ]
+  },
+  {
+    "id": "784a1020-2341-4a01-bbae-62bc205dcce4",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Karaage (Crispy Chicken)",
+    "description": "Japanese-style crispy fried chicken, served as an appetizer.",
+    "price": 11.55,
+    "category": "appetizer",
+    "source_url": "https://postmates.com/store/hironori-craft-ramen-san-diego/rdK5tQZQSkGQmX2oHKHlhA",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Karaage is typically coated in a wheat- or potato-starch batter before frying; exact coating not confirmed by the restaurant."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Karaage marinades commonly include soy sauce."
+      }
+    ]
+  },
+  {
+    "id": "b2c291b5-6f3b-46ae-a388-c2a3372a4bfe",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Pork Rice Bowl (Small)",
+    "description": "Pork chashu slices over rice with spinach, green onion, and a poached egg.",
+    "price": 13.59,
+    "category": "bowl",
+    "source_url": "https://postmates.com/store/hironori-craft-ramen-san-diego/rdK5tQZQSkGQmX2oHKHlhA",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "high",
+        "evidence_note": "Poached egg is explicitly listed as a topping."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Chashu pork is typically braised in a soy-based sauce."
+      }
+    ]
+  },
+  {
+    "id": "56835641-7fd3-4439-be1f-3da28119e7da",
+    "restaurant_id": "b235580a-8103-48b8-b1c0-cace3266ecf4",
+    "name": "Mochi Ice Cream",
+    "description": "Japanese mochi rice cake filled with ice cream, offered as a dessert.",
+    "price": 5.4,
+    "category": "dessert",
+    "source_url": "https://postmates.com/store/hironori-craft-ramen-san-diego/rdK5tQZQSkGQmX2oHKHlhA",
+    "source_type": "third_party_aggregator",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "milk",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "high",
+        "evidence_note": "Ice cream filling is dairy-based."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Some mochi recipes use wheat starch in addition to rice flour; exact recipe not confirmed."
+      }
+    ]
+  },
+  {
+    "id": "0d32b12e-d437-47e7-bdac-441245f0281e",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Ocean View Bowl",
+    "description": "Spicy tuna, seared albacore, and salmon with ginger shoyu and citrus ponzu.",
+    "price": 18.25,
+    "category": "poke bowl",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "fish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Tuna, albacore, and salmon are explicitly listed."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Shoyu (soy sauce) and ponzu (soy-based) are explicitly listed sauces."
+      }
+    ]
+  },
+  {
+    "id": "b156e604-d55b-4077-bf3b-6377bb889be8",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Hamachi Collar Bowl",
+    "description": "Deep fried yellowtail collar with rice, seaweed salad, and Thai chili sauce.",
+    "price": 17.5,
+    "category": "poke bowl",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "fish",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Yellowtail (hamachi) is explicitly listed."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Deep-fried preparation implies a flour-based coating/batter, not confirmed by the restaurant."
+      }
+    ]
+  },
+  {
+    "id": "ac06e2fa-9b42-427c-ba72-3c6c4ebad1ee",
+    "restaurant_id": "b965e85d-2f7b-4a3a-8466-97eed4110024",
+    "name": "Spam & Eggs Plate",
+    "description": "Rice, mac salad, eggs, spam, and fried gyoza.",
+    "price": 11.5,
+    "category": "breakfast",
+    "source_url": "https://pokechopsd.com/menu",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu description explicitly lists eggs."
+      },
+      {
+        "allergen": "wheat",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "medium",
+        "evidence_note": "Fried gyoza has a wheat-based wrapper; mac salad dressing may also contain wheat/gluten thickeners."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Gyoza filling is commonly seasoned with soy sauce."
+      }
+    ]
+  },
+  {
+    "id": "738999b4-ca65-44e9-8af3-1320e5a712f4",
+    "restaurant_id": "23700030-e8b8-4bea-8074-590c157350e9",
+    "name": "Pad Thai Noodles (Chicken)",
+    "description": "Pan fried rice noodles with egg and bean sprouts, served with chicken.",
+    "price": 13.95,
+    "category": "noodles",
+    "source_url": "https://fisherman-static.s3.amazonaws.com/public/spicesthaikitchendelmar/Menu_u4qujUn.pdf",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists egg as an ingredient in the pan-fried rice noodles."
+      },
+      {
+        "allergen": "peanuts",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "medium",
+        "evidence_note": "Pad Thai is traditionally garnished with crushed peanuts (the restaurant's own lunch-special version of this dish explicitly lists crushed peanut), but this entree-menu description does not itemize peanuts."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Pad Thai sauce is commonly soy- and/or fish-sauce based; not itemized in this menu description."
+      },
+      {
+        "allergen": "fish",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Traditional Pad Thai sauce commonly includes fish sauce; not itemized in this menu description."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "not_compatible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      },
+      {
+        "attribute": "vegan",
+        "status": "not_compatible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "9b32fe5d-1dea-493e-ae7a-b156ba04f7a5",
+    "restaurant_id": "23700030-e8b8-4bea-8074-590c157350e9",
+    "name": "Thai Fried Rice (Tofu)",
+    "description": "Fried rice with egg and tomato, served with tofu.",
+    "price": 13.95,
+    "category": "rice",
+    "source_url": "https://fisherman-static.s3.amazonaws.com/public/spicesthaikitchendelmar/Menu_u4qujUn.pdf",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "eggs",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Menu explicitly lists egg as an ingredient in the fried rice."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "ingredient_explicitly_listed",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "evidence_note": "Tofu, the dish's named protein choice, is a soybean-based ingredient."
+      },
+      {
+        "allergen": "fish",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Fish sauce is a common seasoning in Thai fried rice; not itemized in this menu description."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "possible",
+        "evidence_source": "official_menu_description",
+        "confidence": "medium",
+        "last_verified_at": "2026-08-03"
+      },
+      {
+        "attribute": "vegan",
+        "status": "not_compatible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "97097906-dfc1-4265-b56f-58793da002b7",
+    "restaurant_id": "23700030-e8b8-4bea-8074-590c157350e9",
+    "name": "Green Curry (Chicken)",
+    "description": "Green curry with sliced bamboo shoots, peas and carrot, served with chicken.",
+    "price": 13.95,
+    "category": "curry",
+    "source_url": "https://fisherman-static.s3.amazonaws.com/public/spicesthaikitchendelmar/Menu_u4qujUn.pdf",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "milk",
+        "assessment": "unknown",
+        "evidence_source": "unknown",
+        "confidence": "insufficient",
+        "evidence_note": "Thai green curries are commonly coconut-milk based, but this menu description does not itemize the sauce's ingredients, and coconut milk is not a dairy-milk allergen in any case; no itemized ingredient list is published."
+      },
+      {
+        "allergen": "fish",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Thai curry sauces commonly include fish sauce; not itemized in this menu description."
+      },
+      {
+        "allergen": "shellfish",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Traditional Thai green curry paste is often made with shrimp paste as a base seasoning; not confirmed for this specific kitchen's recipe."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "not_compatible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      },
+      {
+        "attribute": "vegan",
+        "status": "not_compatible",
+        "evidence_source": "official_menu_description",
+        "confidence": "high",
+        "last_verified_at": "2026-08-03"
+      }
+    ]
+  },
+  {
+    "id": "a5732302-d613-4aba-b401-3e32a36ef054",
+    "restaurant_id": "23700030-e8b8-4bea-8074-590c157350e9",
+    "name": "Thai Spring Rolls (Deep Fried)",
+    "description": "8 pieces, stuffed with silver noodles and mixed vegetables, served with plum sauce.",
+    "price": 7.95,
+    "category": "appetizer",
+    "source_url": "https://fisherman-static.s3.amazonaws.com/public/spicesthaikitchendelmar/Menu_u4qujUn.pdf",
+    "source_type": "official_restaurant_website",
+    "data_collected_at": "2026-08-03",
+    "last_checked_at": "2026-08-03",
+    "allergens": [
+      {
+        "allergen": "wheat",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Deep-fried spring roll wrappers are typically wheat-flour based; the restaurant's description names only the filling (silver noodles and mixed vegetables), not the wrapper."
+      },
+      {
+        "allergen": "soy",
+        "assessment": "possible_based_on_description",
+        "evidence_source": "student_analysis_of_public_description",
+        "confidence": "low",
+        "evidence_note": "Plum dipping sauce recipes sometimes include soy; not itemized in this menu description."
+      }
+    ],
+    "dietary_attributes": [
+      {
+        "attribute": "vegetarian",
+        "status": "possible",
+        "evidence_source": "official_menu_description",
+        "confidence": "medium",
+        "last_verified_at": "2026-08-03"
+      },
+      {
+        "attribute": "vegan",
+        "status": "possible",
+        "evidence_source": "official_menu_description",
+        "confidence": "medium",
+        "last_verified_at": "2026-08-03"
       }
     ]
   }
