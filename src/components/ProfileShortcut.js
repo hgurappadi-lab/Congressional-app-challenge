@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Leaf, ChevronRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { loadGuestProfile, loadUserProfile } from "@/lib/profile";
+import { loadGuestProfile } from "@/lib/profile";
 import { ALLERGENS, DIETARY_RESTRICTIONS } from "@/lib/profile-options";
 import { formatList } from "@/lib/result-summary";
 
@@ -13,35 +12,19 @@ const DIETARY_LABELS = Object.fromEntries(DIETARY_RESTRICTIONS.map((d) => [d.id,
 
 // Compact "Your profile" pill linking to /profile — shown near the top of
 // every main app page so the user's allergy list is always one tap away.
-// Self-contained (loads its own guest/signed-in profile) so it can be
-// dropped into any page without threading profile state through props.
+// Self-contained (loads its own on-device profile) so it can be dropped
+// into any page without threading profile state through props.
 export default function ProfileShortcut() {
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-
-      if (user) {
-        try {
-          const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(loaded);
-        } catch {
-          if (!cancelled) setProfile(loadGuestProfile());
-        }
-      } else {
-        setProfile(loadGuestProfile());
-      }
+    // Deferred to an effect (not a lazy useState initializer) so the
+    // server-rendered HTML (no localStorage access) matches the client's
+    // first paint before this swaps in the real on-device profile.
+    function load() {
+      setProfile(loadGuestProfile());
     }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const allergenNames = (profile?.allergies ?? []).map((a) => ALLERGEN_LABELS[a.allergen] ?? a.allergen);

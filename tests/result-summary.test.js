@@ -6,6 +6,7 @@ import {
   summarizeRestaurantResult,
   summarizeDishResult,
   summarizeScoreFactors,
+  getRecommendedDishes,
 } from "../src/lib/result-summary";
 
 describe("formatList", () => {
@@ -42,6 +43,28 @@ describe("summarizeRestaurantResult", () => {
   it("falls back to a neutral explanation when nothing is documented", () => {
     const { explanation } = summarizeRestaurantResult({ classificationCounts: {} });
     expect(explanation).toBe("Not enough information is available for this menu yet.");
+  });
+});
+
+describe("getRecommendedDishes", () => {
+  it("ranks strong matches, then modification, then confirm, then undocumented dishes last", () => {
+    const dishes = [
+      { id: "a", classification: CLASSIFICATIONS.INSUFFICIENT_INFORMATION },
+      { id: "b", classification: CLASSIFICATIONS.CONFIRM_BEFORE_ORDERING },
+      { id: "c", classification: CLASSIFICATIONS.STRONG_MATCH },
+      { id: "d", classification: CLASSIFICATIONS.MODIFICATION_NEEDED },
+    ];
+    expect(getRecommendedDishes(dishes, 4).map((d) => d.id)).toEqual(["c", "d", "b", "a"]);
+  });
+
+  it("always excludes a confirmed allergen conflict, even with nothing else to recommend", () => {
+    const dishes = [{ id: "a", classification: CLASSIFICATIONS.ALLERGEN_IDENTIFIED }];
+    expect(getRecommendedDishes(dishes)).toEqual([]);
+  });
+
+  it("includes undocumented dishes rather than returning empty when that's all there is", () => {
+    const dishes = [{ id: "a", classification: CLASSIFICATIONS.INSUFFICIENT_INFORMATION }];
+    expect(getRecommendedDishes(dishes).map((d) => d.id)).toEqual(["a"]);
   });
 });
 

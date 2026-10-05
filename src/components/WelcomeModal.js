@@ -1,10 +1,9 @@
 import Link from "next/link";
 
 // Shown as a blocking overlay on top of the home page for anyone who
-// hasn't set up a food profile yet (no guest profile saved, not signed
-// in). Replaces the old standalone /welcome page — same content and same
-// three exits (signup, guest, sign in), just presented as a popup so the
-// main page is the first thing people see.
+// hasn't set up a food profile yet (no guest profile saved). This app has
+// no accounts — everyone is a guest — so there's a single exit straight
+// into /profile.
 export default function WelcomeModal() {
   return (
     <div
@@ -29,29 +28,16 @@ export default function WelcomeModal() {
 
         <div className="flex w-full flex-col gap-3">
           <Link
-            href="/auth/signup"
+            href="/profile"
             className="flex min-h-11 items-center justify-center rounded-2xl bg-primary px-4 text-sm font-medium text-white hover:bg-primary-hover"
           >
             Get started
           </Link>
-          <Link
-            href="/profile"
-            className="flex min-h-11 items-center justify-center rounded-2xl border border-border bg-card px-4 text-sm font-medium text-text hover:border-accent"
-          >
-            Continue as guest
-          </Link>
-          <Link
-            href="/auth/signin"
-            className="flex min-h-11 items-center justify-center px-4 text-sm font-medium text-primary hover:text-primary-hover"
-          >
-            Sign in
-          </Link>
         </div>
 
         <p className="max-w-xs text-xs text-text-muted">
-          This is a San Diego-area prototype. It never guarantees a dish is
-          free from allergens or cross-contact — always confirm with the
-          restaurant before ordering.
+          It never guarantees a dish is free from allergens or cross-contact
+          — always confirm with the restaurant before ordering.
         </p>
       </div>
     </div>

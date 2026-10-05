@@ -1,9 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-// Call from Server Components / Route Handlers only. Reads the user's auth
-// session from cookies via the public anon key + RLS (still not a
-// privileged client — see admin.js for the service-role client).
+// Call from Server Components / Route Handlers only. Guest-only app (no
+// accounts), so there's no user session to read here — this queries the
+// curated dataset (restaurants/menu_items) via the public anon key + RLS,
+// same as any anonymous request. Still not a privileged client — see
+// admin.js for the service-role client used by the seed scripts.
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -15,16 +17,8 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
-          } catch {
-            // Called from a Server Component render (not a Route Handler /
-            // Server Action) — cookies can't be set here. Session refresh
-            // for that case is handled by src/proxy.js instead.
-          }
+        setAll() {
+          // No session cookies to write back — nothing to do.
         },
       },
     },

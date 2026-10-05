@@ -3,7 +3,6 @@ import {
   addFavoriteEntry,
   removeFavoriteEntry,
   isFavoriteEntry,
-  mergeFavoritesWithTargets,
   DEFAULT_LIST_NAME,
 } from "../src/lib/favorites";
 
@@ -76,54 +75,5 @@ describe("isFavoriteEntry", () => {
         listName: "Try Later",
       }),
     ).toBe(false);
-  });
-});
-
-describe("mergeFavoritesWithTargets", () => {
-  it("resolves a restaurant favorite's name", () => {
-    const rows = [{ id: "f1", target_type: "restaurant", target_id: "r1", list_name: "Favorites", created_at: "2026-01-01" }];
-    const result = mergeFavoritesWithTargets(rows, { r1: { id: "r1", name: "CAVA" } }, {});
-    expect(result).toEqual([
-      expect.objectContaining({ available: true, name: "CAVA", restaurantName: null }),
-    ]);
-  });
-
-  it("marks a dangling restaurant favorite as unavailable", () => {
-    const rows = [{ id: "f1", target_type: "restaurant", target_id: "r1", list_name: "Favorites", created_at: "2026-01-01" }];
-    const result = mergeFavoritesWithTargets(rows, {}, {});
-    expect(result).toEqual([expect.objectContaining({ available: false, name: null })]);
-  });
-
-  it("resolves a dish favorite's name and parent restaurant name (object-shaped relation)", () => {
-    const rows = [{ id: "f1", target_type: "dish", target_id: "d1", list_name: "Favorites", created_at: "2026-01-01" }];
-    const dishesById = {
-      d1: { id: "d1", name: "Bulgogi", restaurant_id: "r1", restaurants: { name: "Manna Heaven BBQ" } },
-    };
-    const result = mergeFavoritesWithTargets(rows, {}, dishesById);
-    expect(result).toEqual([
-      expect.objectContaining({
-        available: true,
-        name: "Bulgogi",
-        restaurantId: "r1",
-        restaurantName: "Manna Heaven BBQ",
-      }),
-    ]);
-  });
-
-  it("resolves the parent restaurant name when the embedded relation is array-shaped", () => {
-    const rows = [{ id: "f1", target_type: "dish", target_id: "d1", list_name: "Favorites", created_at: "2026-01-01" }];
-    const dishesById = {
-      d1: { id: "d1", name: "Bulgogi", restaurant_id: "r1", restaurants: [{ name: "Manna Heaven BBQ" }] },
-    };
-    const result = mergeFavoritesWithTargets(rows, {}, dishesById);
-    expect(result[0].restaurantName).toBe("Manna Heaven BBQ");
-  });
-
-  it("marks a dangling dish favorite as unavailable", () => {
-    const rows = [{ id: "f1", target_type: "dish", target_id: "d1", list_name: "Favorites", created_at: "2026-01-01" }];
-    const result = mergeFavoritesWithTargets(rows, {}, {});
-    expect(result).toEqual([
-      expect.objectContaining({ available: false, name: null, restaurantName: null }),
-    ]);
   });
 });

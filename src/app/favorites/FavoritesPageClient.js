@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Heart, MapPin, Utensils } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import {
   loadGuestFavorites,
   removeGuestFavorite,
@@ -58,11 +57,10 @@ async function resolveGuestFavorite(entry) {
 }
 
 // Favorites deliberately don't reuse RestaurantResultCard/DishResultCard —
-// neither the guest lookup nor the signed-in /api/favorites list carries
-// classification/score data for this user's real profile (both intentionally
-// use a stub profile), so showing a status badge or score here would be
-// misleading rather than simplified. This is a plain, consistently-styled
-// name + link + remove card instead.
+// the guest lookup doesn't carry classification/score data for this user's
+// real profile (it intentionally uses a stub profile), so showing a status
+// badge or score here would be misleading rather than simplified. This is
+// a plain, consistently-styled name + link + remove card instead.
 function FavoriteRow({ item, onRemove }) {
   const Icon = item.targetType === "restaurant" ? MapPin : Utensils;
 
@@ -104,7 +102,6 @@ function FavoriteRow({ item, onRemove }) {
 }
 
 export default function FavoritesPageClient() {
-  const [isGuest, setIsGuest] = useState(null);
   const [favorites, setFavorites] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -114,27 +111,10 @@ export default function FavoritesPageClient() {
     async function load() {
       setLoading(true);
       setError("");
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setIsGuest(!user);
-
       try {
-        if (!user) {
-          const entries = loadGuestFavorites();
-          const resolved = await Promise.all(entries.map(resolveGuestFavorite));
-          if (!cancelled) setFavorites(resolved);
-        } else {
-          const response = await fetch("/api/favorites");
-          if (!response.ok) {
-            const body = await response.json().catch(() => ({}));
-            throw new Error(body.error || `Request failed (${response.status}).`);
-          }
-          const body = await response.json();
-          if (!cancelled) setFavorites(body.favorites);
-        }
+        const entries = loadGuestFavorites();
+        const resolved = await Promise.all(entries.map(resolveGuestFavorite));
+        if (!cancelled) setFavorites(resolved);
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {
@@ -148,18 +128,8 @@ export default function FavoritesPageClient() {
   }, []);
 
   function handleRemove(item) {
-    if (isGuest) {
-      removeGuestFavorite({ targetType: item.targetType, targetId: item.targetId });
-      setFavorites((prev) => prev.filter((f) => f.key !== item.key));
-      return;
-    }
-    fetch("/api/favorites", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ targetType: item.targetType, targetId: item.targetId }),
-    }).then(() => {
-      setFavorites((prev) => prev.filter((f) => f.id !== item.id));
-    });
+    removeGuestFavorite({ targetType: item.targetType, targetId: item.targetId });
+    setFavorites((prev) => prev.filter((f) => f.key !== item.key));
   }
 
   const restaurantFavorites = (favorites ?? []).filter((f) => f.targetType === "restaurant");

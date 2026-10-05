@@ -25,14 +25,12 @@ import {
   Utensils,
 } from "lucide-react";
 import { lora } from "@/lib/fonts";
-import { createClient } from "@/lib/supabase/client";
-import { loadGuestProfile, loadUserProfile } from "@/lib/profile";
+import { loadGuestProfile } from "@/lib/profile";
 import { groupDishesByCategory } from "@/lib/group-dishes";
 import { getRecommendedDishes } from "@/lib/result-summary";
 import SafetyDisclaimer from "@/components/SafetyDisclaimer";
 import SafetyReminder from "@/components/SafetyReminder";
 import FavoriteButton from "@/components/FavoriteButton";
-import ScoreSummary from "@/components/ScoreSummary";
 import DishResultCard from "@/components/DishResultCard";
 import EmptyState from "@/components/EmptyState";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
@@ -80,34 +78,15 @@ export default function RestaurantDetailClient({ id }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
-  const [isGuest, setIsGuest] = useState(true);
 
-  // Load the guest or signed-in profile once on mount.
+  // Guest-only app — load the on-device profile once on mount. Deferred to
+  // an effect (not a lazy useState initializer) so the server-rendered
+  // HTML (no localStorage access) matches the client's first paint.
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setIsGuest(!user);
-
-      if (user) {
-        try {
-          const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(loaded);
-        } catch {
-          if (!cancelled) setProfile(loadGuestProfile());
-        }
-      } else {
-        setProfile(loadGuestProfile());
-      }
+    function load() {
+      setProfile(loadGuestProfile());
     }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
@@ -183,11 +162,7 @@ export default function RestaurantDetailClient({ id }) {
       {data ? (
         <>
           <div className="flex flex-col gap-2">
-            <FavoriteButton
-              targetType="restaurant"
-              targetId={data.restaurant.id}
-              isGuest={isGuest}
-            />
+            <FavoriteButton targetType="restaurant" targetId={data.restaurant.id} />
             <h1 className={`${lora.className} text-3xl text-text sm:text-4xl`}>
               {data.restaurant.name}
             </h1>
@@ -223,15 +198,6 @@ export default function RestaurantDetailClient({ id }) {
           </div>
 
           <SafetyDisclaimer />
-
-          <ScoreSummary
-            score={data.score}
-            menuCoveragePercent={data.menuCoveragePercent}
-            crossContactTransparencyPercent={data.crossContactTransparencyPercent}
-            freshnessDays={data.freshnessDays}
-            evidenceHighlight={data.evidenceHighlight}
-            explanation={data.explanation}
-          />
 
           <section className="flex flex-col gap-3">
             <h2 className="text-[22px] font-semibold text-text">Recommended for you</h2>

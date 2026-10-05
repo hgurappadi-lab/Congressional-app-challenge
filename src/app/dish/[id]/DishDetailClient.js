@@ -3,8 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { loadGuestProfile, loadUserProfile } from "@/lib/profile";
+import { loadGuestProfile } from "@/lib/profile";
 import { ALLERGENS, DIETARY_RESTRICTIONS } from "@/lib/profile-options";
 import {
   ASSESSMENT_LABELS,
@@ -67,34 +66,15 @@ export default function DishDetailClient({ id }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
-  const [isGuest, setIsGuest] = useState(true);
 
-  // Load the guest or signed-in profile once on mount.
+  // Guest-only app — load the on-device profile once on mount. Deferred to
+  // an effect (not a lazy useState initializer) so the server-rendered
+  // HTML (no localStorage access) matches the client's first paint.
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setIsGuest(!user);
-
-      if (user) {
-        try {
-          const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(loaded);
-        } catch {
-          if (!cancelled) setProfile(loadGuestProfile());
-        }
-      } else {
-        setProfile(loadGuestProfile());
-      }
+    function load() {
+      setProfile(loadGuestProfile());
     }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
@@ -215,7 +195,7 @@ export default function DishDetailClient({ id }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <FavoriteButton targetType="dish" targetId={data.dish.id} isGuest={isGuest} />
+        <FavoriteButton targetType="dish" targetId={data.dish.id} />
         <h1 className="text-[26px] font-semibold text-text sm:text-[32px]">{data.dish.name}</h1>
         {data.restaurant ? (
           <Link

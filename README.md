@@ -12,12 +12,11 @@ Instead of a single "allergy-friendly" label, the app ranks restaurants and indi
 
 ## Target audience
 
-People managing food allergies or dietary restrictions (and their families) searching for compatible dining options in the San Diego area covered by this prototype.
+People managing food allergies or dietary restrictions (and their families) searching for compatible dining options. Restaurant discovery (Google Places) works anywhere; the curated, scored dataset currently covers one San Diego-area prototype region — see `LIMITATIONS.md`.
 
 ## Features
 
-- Save an allergy profile (allergen + severity/matching strictness) and dietary restrictions
-- Guest mode — try the full app without creating an account
+- Save an allergy profile (allergen + severity/matching strictness) and dietary restrictions — no account needed, everyone is a guest, saved on-device
 - **Explore Nearby** — location + radius search, restaurants ranked by a Choice Availability Score
 - **Find a Dish** — search a craving (e.g. "spicy fried rice") and get matching/related dish results
 - Restaurant detail pages with categorized menu items and a full score explanation
@@ -30,7 +29,7 @@ People managing food allergies or dietary restrictions (and their families) sear
 
 - **Framework:** Next.js 16 (App Router), JavaScript
 - **Styling:** Tailwind CSS 4
-- **Database / Auth:** Supabase (Postgres, Auth, Row Level Security)
+- **Database:** Supabase (Postgres) — curated dataset only, no accounts
 - **Map:** Leaflet + OpenStreetMap (client-side rendering only, free, no API key)
 - **Testing:** Vitest
 - **Deployment:** Vercel + Supabase
@@ -76,7 +75,7 @@ node scripts/seed-menu-data.js
 
 ## Deployment
 
-Deployed on Vercel from the production branch of this repository, with the database/auth hosted on Supabase. Live URL: https://congressional-app-challenge-green.vercel.app. A guest/demo mode means judges do not need credentials to evaluate the app.
+Deployed on Vercel from the production branch of this repository, with the curated dataset hosted on Supabase. Live URL: https://congressional-app-challenge-green.vercel.app. There are no accounts — judges need no credentials to evaluate the app.
 
 ## Screenshots
 

@@ -4,12 +4,12 @@ import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Search, Map as MapIcon, List, X, Navigation, ChevronDown } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { loadGuestProfile, loadUserProfile } from "@/lib/profile";
-import { NEIGHBORHOODS } from "@/lib/neighborhoods";
+import { loadGuestProfile } from "@/lib/profile";
 import { getRecommendedDishes } from "@/lib/result-summary";
 import RestaurantMap from "@/components/RestaurantMap";
 import RestaurantResultCard from "@/components/RestaurantResultCard";
+import UnscoredRestaurantCard from "@/components/UnscoredRestaurantCard";
+import ExpandableExplanation from "@/components/ExpandableExplanation";
 import DishResultCard from "@/components/DishResultCard";
 import SafetyReminder from "@/components/SafetyReminder";
 import EmptyState from "@/components/EmptyState";
@@ -18,6 +18,7 @@ import ErrorState from "@/components/ErrorState";
 import ProfileShortcut from "@/components/ProfileShortcut";
 
 const RADIUS_OPTIONS_MILES = [1, 3, 5, 10, 15];
+const TOP_RESULTS_COUNT = 3;
 const SEARCH_DEBOUNCE_MS = 400;
 const MAX_DISH_RECOMMENDATIONS = 5;
 
@@ -28,8 +29,6 @@ export default function MapPageClient() {
   ); // "explore" | "find-dish"
   const [profile, setProfile] = useState(null);
 
-  const [locationSource, setLocationSource] = useState("neighborhood"); // "geolocation" | "neighborhood"
-  const [neighborhoodId, setNeighborhoodId] = useState(NEIGHBORHOODS[0].id);
   const [coords, setCoords] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [radiusMiles, setRadiusMiles] = useState(5);
@@ -39,6 +38,13 @@ export default function MapPageClient() {
   const [dishResults, setDishResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // "More restaurants nearby" — live, unscored candidates from the Google
+  // Places API (/api/nearby-live). Loads independently of the curated
+  // /api/rank results above so a slow Places response never blocks the
+  // trusted, scored results from rendering.
+  const [nearbyLiveResults, setNearbyLiveResults] = useState(null);
+  const [nearbyLiveLoading, setNearbyLiveLoading] = useState(false);
 
   // Mobile-only Map/List toggle for Explore Nearby, and the restaurant
   // previewed in the bottom sheet when a map marker is tapped.
@@ -61,65 +67,36 @@ export default function MapPageClient() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  // Load the guest or signed-in profile once on mount.
+  // Guest-only app — load the on-device profile once on mount. Deferred to
+  // an effect (not a lazy useState initializer) so the server-rendered
+  // HTML (no localStorage access) matches the client's first paint.
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-
-      if (user) {
-        try {
-          const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(loaded);
-        } catch {
-          if (!cancelled) setProfile(loadGuestProfile());
-        }
-      } else {
-        setProfile(loadGuestProfile());
-      }
+    function load() {
+      setProfile(loadGuestProfile());
     }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   function useMyLocation() {
     setLocationError("");
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocationError("Geolocation isn't available in this browser. Choose a neighborhood instead.");
+      setLocationError("Geolocation isn't available in this browser.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setCoords({ lat: position.coords.latitude, lng: position.coords.longitude });
-        setLocationSource("geolocation");
       },
       () => {
-        setLocationError(
-          "Location permission was denied or unavailable. Choose a neighborhood instead.",
-        );
-        setLocationSource("neighborhood");
+        setLocationError("Location permission was denied. Enable location access and try again.");
       },
     );
   }
 
-  const activeCoords =
-    locationSource === "geolocation" && coords
-      ? coords
-      : (() => {
-          const neighborhood = NEIGHBORHOODS.find((n) => n.id === neighborhoodId);
-          return { lat: neighborhood.lat, lng: neighborhood.lng };
-        })();
-
   // Explore Nearby: fetch ranked restaurants whenever the profile,
   // location, or radius changes.
   useEffect(() => {
-    if (!profile || mode !== "explore") return;
+    if (!profile || !coords || mode !== "explore") return;
 
     let cancelled = false;
     async function run() {
@@ -130,8 +107,8 @@ export default function MapPageClient() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lat: activeCoords.lat,
-            lng: activeCoords.lng,
+            lat: coords.lat,
+            lng: coords.lng,
             radiusMiles,
             allergies: profile.allergies,
             dietaryRestrictions: profile.dietary_restrictions,
@@ -154,12 +131,56 @@ export default function MapPageClient() {
     return () => {
       cancelled = true;
     };
-  }, [profile, mode, activeCoords.lat, activeCoords.lng, radiusMiles]);
+  }, [profile, mode, coords, radiusMiles]);
+
+  const hasCravingStarted = mode === "find-dish" && craving.trim().length > 0;
+
+  // In Find a Dish mode, the craving is passed through as `query` (Text
+  // Search — see /api/nearby-live), so "pizza" actually returns pizza
+  // places instead of the same generic nearby list every time. Debounced
+  // like the curated dish search below so it doesn't re-fetch this paid
+  // API on every keystroke; Explore Nearby (no craving) still fetches
+  // immediately.
+  useEffect(() => {
+    if (!coords) return;
+    if (mode === "find-dish" && !hasCravingStarted) return;
+
+    let cancelled = false;
+    const timer = setTimeout(
+      async () => {
+        setNearbyLiveLoading(true);
+        try {
+          const response = await fetch("/api/nearby-live", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lat: coords.lat,
+              lng: coords.lng,
+              radiusMiles,
+              ...(mode === "find-dish" ? { query: craving.trim() } : {}),
+            }),
+          });
+          if (!response.ok) throw new Error();
+          const body = await response.json();
+          if (!cancelled) setNearbyLiveResults(body.restaurants);
+        } catch {
+          if (!cancelled) setNearbyLiveResults(null);
+        } finally {
+          if (!cancelled) setNearbyLiveLoading(false);
+        }
+      },
+      mode === "find-dish" ? SEARCH_DEBOUNCE_MS : 0,
+    );
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [mode, coords, radiusMiles, craving, hasCravingStarted]);
 
   // Find a Dish: search a craving, debounced, whenever the profile,
   // craving text, location, or radius changes.
   useEffect(() => {
-    if (!profile || mode !== "find-dish" || craving.trim().length === 0) return;
+    if (!profile || !coords || mode !== "find-dish" || craving.trim().length === 0) return;
 
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -171,8 +192,8 @@ export default function MapPageClient() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: craving,
-            lat: activeCoords.lat,
-            lng: activeCoords.lng,
+            lat: coords.lat,
+            lng: coords.lng,
             radiusMiles,
             allergies: profile.allergies,
             dietaryRestrictions: profile.dietary_restrictions,
@@ -196,7 +217,7 @@ export default function MapPageClient() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [profile, mode, craving, activeCoords.lat, activeCoords.lng, radiusMiles]);
+  }, [profile, mode, craving, coords, radiusMiles]);
 
   // An empty craving always means "no results to show," regardless of
   // whatever the last non-empty search happened to return.
@@ -212,14 +233,61 @@ export default function MapPageClient() {
   // pile of ties. Distinguishing this lets the empty state say plainly
   // that the dataset doesn't have anything for this profile here, instead
   // of showing restaurant cards that all read as equally unhelpful.
-  const hasAnyRealMatch = (restaurantResults ?? []).some((restaurant) => {
+  // Explore Nearby shows only the top TOP_RESULTS_COUNT results ("Choice
+  // #1/#2/#3") rather than the full ranked list — /api/rank already sorts
+  // by score descending, so this is just a slice of an already-sorted list.
+  const topRestaurantResults = (restaurantResults ?? []).slice(0, TOP_RESULTS_COUNT);
+
+  // Only hides the top-3 list when a restaurant's menu is entirely
+  // ALLERGEN_IDENTIFIED (a real, known conflict on every dish) or has no
+  // evaluated menu items at all — insufficient-information dishes still
+  // count as "worth showing," matching getRecommendedDishes' policy above:
+  // restaurants can often accommodate a request even without documentation
+  // either way, and every card/dish still carries its own honest
+  // "Limited choice availability" tier / "confirm before ordering" label,
+  // never a false "safe" claim.
+  const hasAnyRealMatch = topRestaurantResults.some((restaurant) => {
     const counts = restaurant.classificationCounts;
     return (
       counts.strong_documented_potential_match > 0 ||
       counts.modification_needed > 0 ||
-      counts.confirm_before_ordering > 0
+      counts.confirm_before_ordering > 0 ||
+      counts.insufficient_information > 0
     );
   });
+
+  // Shared between Explore Nearby and Find a Dish — a list of live,
+  // unscored Google Places restaurants outside the curated dataset. The
+  // list itself is always chosen deterministically (nearest by distance);
+  // `craving`, when given, is only ever passed to each card's own
+  // human-triggered "check with AI" button, never used to have AI
+  // pick/filter which restaurants appear here.
+  function renderNearbyLiveSection(craving) {
+    if (!nearbyLiveLoading && !(nearbyLiveResults && nearbyLiveResults.length > 0)) return null;
+    return (
+      <div className="mt-6 flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-text-secondary">
+          More restaurants nearby — not yet verified in our dataset
+        </h2>
+
+        {nearbyLiveLoading ? (
+          <LoadingSkeleton />
+        ) : (
+          <ExpandableExplanation label={`Check out other options (${nearbyLiveResults.length})`}>
+            <ul className="flex flex-col gap-3">
+              {nearbyLiveResults.map((restaurant) => (
+                <UnscoredRestaurantCard
+                  key={`${restaurant.name}-${restaurant.lat}-${restaurant.lng}`}
+                  restaurant={restaurant}
+                  craving={craving}
+                />
+              ))}
+            </ul>
+          </ExpandableExplanation>
+        )}
+      </div>
+    );
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-8">
@@ -293,24 +361,6 @@ export default function MapPageClient() {
             Use my location
           </button>
 
-          <label className="flex min-w-0 flex-col gap-1 text-sm text-text-secondary sm:flex-row sm:items-center sm:gap-2">
-            or pick a neighborhood
-            <select
-              value={neighborhoodId}
-              onChange={(event) => {
-                setNeighborhoodId(event.target.value);
-                setLocationSource("neighborhood");
-              }}
-              className="min-h-11 w-full min-w-0 rounded-xl border border-border bg-card px-2 py-1 text-text sm:w-auto sm:max-w-[220px]"
-            >
-              {NEIGHBORHOODS.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.label}
-                </option>
-              ))}
-            </select>
-          </label>
-
           <label className="flex items-center gap-2 text-sm text-text-secondary">
             within
             <select
@@ -359,14 +409,32 @@ export default function MapPageClient() {
 
       {error ? <ErrorState message={error} /> : null}
 
-      {mode === "explore" ? (
+      {!coords ? (
+        <EmptyState
+          icon={Navigation}
+          title="Share your location to get started"
+          description="We'll look for restaurants within your selected radius, wherever you are."
+          action={
+            <button
+              type="button"
+              onClick={useMyLocation}
+              className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-medium text-white hover:bg-primary-hover"
+            >
+              <Navigation aria-hidden="true" className="h-4 w-4" />
+              Use my location
+            </button>
+          }
+        />
+      ) : (
+        <>
+          {mode === "explore" ? (
         <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
           <div className={`${mobileView === "map" ? "block" : "hidden"} lg:block`}>
             <div className="relative">
               {isDesktop || mobileView === "map" ? (
                 <RestaurantMap
-                  center={activeCoords}
-                  restaurants={restaurantResults ?? []}
+                  center={coords}
+                  restaurants={topRestaurantResults}
                   onSelectRestaurant={setPreviewRestaurant}
                 />
               ) : (
@@ -398,30 +466,32 @@ export default function MapPageClient() {
             {!loading && restaurantResults && restaurantResults.length === 0 ? (
               <EmptyState
                 icon={MapIcon}
-                title="No restaurants found nearby"
-                description={`Try a larger radius than ${radiusMiles} miles.`}
+                title="No curated matches this close yet"
+                description="Our verified dataset doesn't cover this area yet — see live results from Google below, or try a larger radius."
               />
             ) : null}
 
             {!loading && restaurantResults && restaurantResults.length > 0 && !hasAnyRealMatch ? (
               <EmptyState
                 icon={MapIcon}
-                title="No options in the dataset match your profile here"
-                description={`Nothing within ${radiusMiles} miles has documented information matching your allergies or dietary needs yet. Try a larger radius.`}
+                title="No curated options match your profile here"
+                description={`Nothing within ${radiusMiles} miles has documented information matching your allergies or dietary needs yet — see live results from Google below, or try a larger radius.`}
               />
             ) : null}
 
             {!loading && restaurantResults && restaurantResults.length > 0 && hasAnyRealMatch ? (
               <ul className="flex flex-col gap-3">
-                {restaurantResults.map((restaurant, index) => (
+                {topRestaurantResults.map((restaurant, index) => (
                   <RestaurantResultCard
                     key={restaurant.id}
                     restaurant={restaurant}
-                    highlight={index === 0}
+                    rank={index + 1}
                   />
                 ))}
               </ul>
             ) : null}
+
+            {renderNearbyLiveSection()}
           </div>
         </div>
       ) : (
@@ -439,8 +509,8 @@ export default function MapPageClient() {
           {!loading && effectiveDishResults && effectiveDishResults.length === 0 ? (
             <EmptyState
               icon={Search}
-              title={`No dishes matched "${craving}"`}
-              description={`Try a different craving, or a larger radius than ${radiusMiles} miles.`}
+              title={`No curated dishes matched "${craving}"`}
+              description="See live results from Google below, or try a different craving or a larger radius."
             />
           ) : null}
 
@@ -468,7 +538,11 @@ export default function MapPageClient() {
               />
             </div>
           ) : null}
+
+          {hasCravingStarted ? renderNearbyLiveSection(craving.trim()) : null}
         </div>
+          )}
+        </>
       )}
     </main>
   );

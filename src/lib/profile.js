@@ -1,11 +1,7 @@
-// Guest-mode profile storage.
-//
-// Registered users' profiles live in Supabase (the `profiles` table, RLS'd
-// to their own row). Guest users get the exact same profile shape, but it
-// lives only in the browser's localStorage — nothing is sent to the server
-// until/unless they create an account. This is what lets a judge use the
-// full app with zero signup (CAC §16 requires judge access without an
-// account).
+// Profile storage — guest-only app, no accounts. Every profile lives only
+// in the browser's localStorage; nothing is ever sent to the server. This
+// is what lets a judge use the full app with zero signup (CAC §16 requires
+// judge access without an account).
 
 const GUEST_PROFILE_KEY = "allergy-food-app:guest-profile";
 
@@ -55,29 +51,4 @@ export function saveGuestProfile(profile) {
 export function clearGuestProfile() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(GUEST_PROFILE_KEY);
-}
-
-// Saves a profile for a signed-in user via the browser Supabase client.
-// Callers pass in the client (from lib/supabase/client.js) so this module
-// stays free of a hard dependency on how the client is constructed.
-export async function saveUserProfile(supabase, userId, profile) {
-  const { error } = await supabase.from("profiles").upsert({
-    id: userId,
-    allergies: profile.allergies,
-    dietary_restrictions: profile.dietary_restrictions,
-    matching_strictness: profile.matching_strictness,
-  });
-
-  if (error) throw error;
-}
-
-export async function loadUserProfile(supabase, userId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("allergies, dietary_restrictions, matching_strictness")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data ? { ...emptyProfile(), ...data } : emptyProfile();
 }

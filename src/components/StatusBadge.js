@@ -38,9 +38,16 @@ const STATUS_STYLES = {
 };
 
 export default function StatusBadge({ classification, size = "md" }) {
-  const style = STATUS_STYLES[classification] ?? STATUS_STYLES[CLASSIFICATIONS.INSUFFICIENT_INFORMATION];
+  // "Insufficient information" showed on nearly every dish given the
+  // dataset's size and read as repetitive clutter rather than useful
+  // signal — removed per user request (2026-09-11, minimalism pass); the
+  // app's disclaimers already cover "confirm before ordering" everywhere.
+  if (classification === CLASSIFICATIONS.INSUFFICIENT_INFORMATION) return null;
+
+  const style = STATUS_STYLES[classification];
+  if (!style) return null;
   const Icon = style.icon;
-  const label = CLASSIFICATION_LABELS[classification] ?? "Insufficient information";
+  const label = CLASSIFICATION_LABELS[classification];
   const sizeClasses = size === "sm" ? "px-2 py-0.5 text-xs gap-1" : "px-3 py-1 text-sm gap-1.5";
 
   return (

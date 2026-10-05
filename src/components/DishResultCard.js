@@ -39,9 +39,9 @@ export default function DishResultCard({ dish, highlight = false }) {
           </p>
         ) : null}
 
-        <div className="mt-1 flex items-center justify-between gap-3">
+        <div className="mt-1 flex items-center gap-3">
           <StatusBadge classification={dish.classification} />
-          <span className="flex min-h-11 items-center gap-1 text-sm font-medium text-primary">
+          <span className="ml-auto flex min-h-11 items-center gap-1 text-sm font-medium text-primary">
             View details
             <ChevronRight aria-hidden="true" className="h-4 w-4" />
           </span>

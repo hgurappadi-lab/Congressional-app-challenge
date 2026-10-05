@@ -9,22 +9,14 @@ import {
   Utensils,
   User,
   Heart,
-  ShieldCheck,
   ArrowRight,
   ChevronDown,
   Leaf,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { hasGuestProfile } from "@/lib/profile";
+import { NAV_LINKS } from "@/lib/nav-links";
 import ProfileShortcut from "@/components/ProfileShortcut";
 import WelcomeModal from "@/components/WelcomeModal";
-
-const NAV_LINKS = [
-  { href: "/home", label: "Home" },
-  { href: "/map", label: "Explore" },
-  { href: "/map?mode=find-dish", label: "Find a Dish" },
-  { href: "/favorites", label: "Favorites" },
-];
 
 // Soft rolling-hills motif for the Explore Nearby card — decorative only.
 function HillsIllustration() {
@@ -73,7 +65,9 @@ function ActionCard({ href, icon: Icon, title, description, illustration }) {
         <Icon aria-hidden="true" className="h-5 w-5" />
       </span>
       <span className={`${lora.className} text-xl font-semibold text-text`}>{title}</span>
-      <span className="max-w-[75%] text-sm text-text-secondary">{description}</span>
+      {description ? (
+        <span className="max-w-[75%] text-sm text-text-secondary">{description}</span>
+      ) : null}
 
       {illustration === "hills" ? <HillsIllustration /> : <ClocheIllustration />}
 
@@ -88,26 +82,16 @@ function ActionCard({ href, icon: Icon, title, description, illustration }) {
 // lives here at all, per the redesign spec; it's just a profile summary
 // (in the header pill), the two primary actions, and secondary links.
 export default function HomePageClient() {
-  const [user, setUser] = useState(null);
-  const [checkedAuth, setCheckedAuth] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user: loadedUser },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-      setUser(loadedUser);
-      setCheckedAuth(true);
-      setShowWelcome(!loadedUser && !hasGuestProfile());
+    // Deferred to an effect (not a lazy useState initializer) so the
+    // server-rendered HTML (no localStorage access) matches the client's
+    // first paint before this decides whether to show the welcome modal.
+    function load() {
+      setShowWelcome(!hasGuestProfile());
     }
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   return (
@@ -195,30 +179,14 @@ export default function HomePageClient() {
           <h2 className={`${lora.className} text-3xl leading-[1.1] text-text sm:text-4xl`}>
             What are you looking for <span className="italic text-primary">today?</span>
           </h2>
-          <p className="max-w-md text-base text-text-secondary">
-            Find dishes and restaurants that fit your allergies and dietary needs.
-          </p>
-          <div className="flex items-center gap-2">
-            <ShieldCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-primary" />
-            <p className="max-w-sm text-xs text-text-muted">
-              Evidence-based. Allergy-conscious ingredients and preparation with the restaurant.
-            </p>
-          </div>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <ActionCard
-            href="/map"
-            icon={MapPin}
-            title="Explore Nearby"
-            description="Browse restaurants near you, ranked for your profile."
-            illustration="hills"
-          />
+          <ActionCard href="/map" icon={MapPin} title="Explore Nearby" illustration="hills" />
           <ActionCard
             href="/map?mode=find-dish"
             icon={Utensils}
             title="Find a Dish"
-            description="Search for a specific craving or dish nearby."
             illustration="cloche"
           />
         </div>
@@ -243,31 +211,6 @@ export default function HomePageClient() {
             </span>
           </Link>
         </div>
-
-        {checkedAuth ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-sm text-text-muted">
-            {user ? (
-              <>
-                <span>Signed in as {user.email}</span>
-                <form action="/auth/signout" method="post">
-                  <button
-                    type="submit"
-                    className="min-h-11 rounded-xl border border-border bg-card px-3 text-sm text-text-secondary hover:border-accent"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <span>Browsing as a guest — your profile is saved on this device only.</span>
-                <Link href="/auth/signin" className="font-medium text-primary hover:text-primary-hover">
-                  Sign in
-                </Link>
-              </>
-            )}
-          </div>
-        ) : null}
       </div>
       </div>
     </main>

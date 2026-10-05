@@ -2,20 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Salad, Leaf, ShieldCheck, Save, Trash2 } from "lucide-react";
+import { Salad, Leaf, Save } from "lucide-react";
 import { lora } from "@/lib/fonts";
-import { createClient } from "@/lib/supabase/client";
-import {
-  emptyProfile,
-  loadGuestProfile,
-  saveGuestProfile,
-  loadUserProfile,
-  saveUserProfile,
-} from "@/lib/profile";
+import { emptyProfile, loadGuestProfile, saveGuestProfile } from "@/lib/profile";
 import { ALLERGENS, DEFAULT_ALLERGY_SEVERITY, DIETARY_RESTRICTIONS } from "@/lib/profile-options";
 import AllergenChip from "@/components/AllergenChip";
 import DietaryChip from "@/components/DietaryChip";
-import ProfileSummary from "@/components/ProfileSummary";
 import SafetyDisclaimer from "@/components/SafetyDisclaimer";
 
 const OFFERED_DIETARY_IDS = new Set(DIETARY_RESTRICTIONS.map((d) => d.id));
@@ -35,43 +27,20 @@ function normalizeProfile(profile) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [userId, setUserId] = useState(null);
   const [profile, setProfile] = useState(emptyProfile());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Deferred to an effect (not a lazy useState initializer) so the
+  // server-rendered HTML (no localStorage access) matches the client's
+  // first paint before this loads the real on-device profile.
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (cancelled) return;
-
-      if (user) {
-        setUserId(user.id);
-        try {
-          const loaded = await loadUserProfile(supabase, user.id);
-          if (!cancelled) setProfile(normalizeProfile(loaded));
-        } catch (error) {
-          if (!cancelled) setErrorMessage(error.message);
-        }
-      } else {
-        setProfile(normalizeProfile(loadGuestProfile()));
-      }
-
-      if (!cancelled) setLoading(false);
+    function load() {
+      setProfile(normalizeProfile(loadGuestProfile()));
+      setLoading(false);
     }
-
     load();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   function toggleAllergen(allergenId) {
@@ -106,37 +75,11 @@ export default function ProfilePage() {
     setErrorMessage("");
 
     try {
-      if (userId) {
-        const supabase = createClient();
-        await saveUserProfile(supabase, userId, profile);
-      } else {
-        saveGuestProfile(profile);
-      }
+      saveGuestProfile(profile);
       router.push("/home");
     } catch (error) {
       setErrorMessage(error.message);
       setSaving(false);
-    }
-  }
-
-  async function handleDeleteAccount() {
-    const confirmed = window.confirm(
-      "Delete your account? This permanently removes your profile and favorites and can't be undone.",
-    );
-    if (!confirmed) return;
-
-    setDeleting(true);
-    setErrorMessage("");
-    try {
-      const response = await fetch("/api/account", { method: "DELETE" });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.error || `Request failed (${response.status}).`);
-      }
-      router.push("/home");
-    } catch (error) {
-      setErrorMessage(error.message);
-      setDeleting(false);
     }
   }
 
@@ -174,20 +117,6 @@ export default function ProfilePage() {
 
           <div className="flex flex-col gap-1 pr-0 sm:pr-28">
             <h1 className={`${lora.className} text-3xl text-text sm:text-4xl`}>Your food profile</h1>
-            <p className="text-sm font-medium text-primary">
-              {userId
-                ? "Saved to your account."
-                : "Saved on this device only — sign up to keep it across devices."}
-            </p>
-          </div>
-
-          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-status-match-border bg-status-match-bg px-4 py-3 sm:mr-28">
-            <ShieldCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-status-match-text" />
-            <ProfileSummary
-              allergies={profile.allergies}
-              dietaryRestrictions={profile.dietary_restrictions}
-              className="text-sm font-medium text-status-match-text"
-            />
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-8">
@@ -198,9 +127,6 @@ export default function ProfilePage() {
                 </span>
                 <legend className={`${lora.className} text-xl text-text`}>Allergies</legend>
               </div>
-              <p className="pl-[42px] text-sm text-text-secondary">
-                Select the ingredients you want to avoid.
-              </p>
               <div className="flex flex-wrap gap-2 pl-[42px]">
                 {ALLERGENS.map((allergen) => {
                   const selected = profile.allergies.some((a) => a.allergen === allergen.id);
@@ -224,9 +150,6 @@ export default function ProfilePage() {
                 </span>
                 <legend className={`${lora.className} text-xl text-text`}>Dietary restrictions</legend>
               </div>
-              <p className="pl-[42px] text-sm text-text-secondary">
-                Select dietary preferences that matter to you.
-              </p>
               <div className="flex flex-wrap gap-2 pl-[42px]">
                 {DIETARY_RESTRICTIONS.map((restriction) => (
                   <DietaryChip
@@ -264,18 +187,6 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
-
-          {userId ? (
-            <button
-              type="button"
-              onClick={handleDeleteAccount}
-              disabled={deleting}
-              className="mx-auto mt-6 flex min-h-11 items-center gap-1.5 text-sm font-medium text-status-allergen-text disabled:opacity-50"
-            >
-              <Trash2 aria-hidden="true" className="h-4 w-4" />
-              {deleting ? "Deleting account…" : "Delete my account"}
-            </button>
-          ) : null}
         </div>
       </div>
     </main>

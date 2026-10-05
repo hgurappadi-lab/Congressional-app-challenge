@@ -120,15 +120,22 @@ export function summarizeDishResult({ criteria = [] }) {
   return { explanation, badges: badges.slice(0, 4) };
 }
 
-// Which dishes count as "worth recommending" — a real documented match
-// candidate, as opposed to insufficient information or a confirmed
-// allergen. Shared by the restaurant detail menu and Find a Dish so both
-// surface a short "Recommended for you" list instead of dumping every
-// matched dish, undocumented ones included, into the primary view.
+// Which dishes count as "worth recommending" — anything except a
+// confirmed allergen conflict (ALLERGEN_IDENTIFIED is the one tier that
+// always means "a real, known problem," not just missing paperwork, so
+// it's the only classification excluded here). INSUFFICIENT_INFORMATION
+// ranks last, not excluded: restaurants can often accommodate a request
+// even when this app has no documentation either way, and the app's
+// disclaimers (SafetyDisclaimer, "confirm before ordering") already carry
+// that caveat everywhere a dish is shown — see LIMITATIONS.md. Shared by
+// the restaurant detail menu and Find a Dish so both surface a short
+// "Recommended for you" list instead of dumping every matched dish into
+// the primary view unranked.
 const RECOMMENDATION_RANK = {
   [CLASSIFICATIONS.STRONG_MATCH]: 0,
   [CLASSIFICATIONS.MODIFICATION_NEEDED]: 1,
   [CLASSIFICATIONS.CONFIRM_BEFORE_ORDERING]: 2,
+  [CLASSIFICATIONS.INSUFFICIENT_INFORMATION]: 3,
 };
 
 export function getRecommendedDishes(dishes, maxCount = 3) {

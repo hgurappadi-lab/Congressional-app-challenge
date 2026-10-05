@@ -1,10 +1,6 @@
-// Guest-mode favorites storage + shared pure helpers, parallel to
-// src/lib/profile.js. Registered users' favorites live in Supabase (the
-// `favorites` table, RLS'd to their own rows, via /api/favorites). Guest
-// users get the same conceptual data, but it lives only in localStorage —
-// there is no server-side guest favorites row, because `favorites.user_id`
-// is NOT NULL (see supabase/schema.sql) and simply cannot exist without a
-// signed-in user.
+// Favorites storage + shared pure helpers, parallel to src/lib/profile.js.
+// Guest-only app — no accounts — so favorites live entirely in
+// localStorage, never on the server.
 
 const GUEST_FAVORITES_KEY = "allergy-food-app:guest-favorites";
 
@@ -81,47 +77,4 @@ export function isGuestFavorite(target) {
 export function clearGuestFavorites() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(GUEST_FAVORITES_KEY);
-}
-
-// ---- Shared pure merge logic for the signed-in GET response ----
-// Combines raw `favorites` rows (no FK to restaurants/menu_items — see
-// schema) with separately-fetched restaurant/dish rows, keyed by id. Used
-// only server-side by /api/favorites route.js, but kept pure/here (not in
-// app/api/_lib) so it's unit-testable like the rest of /lib.
-export function mergeFavoritesWithTargets(favoriteRows, restaurantsById, dishesById) {
-  return favoriteRows.map((row) => {
-    if (row.target_type === "restaurant") {
-      const restaurant = restaurantsById[row.target_id];
-      return {
-        id: row.id,
-        targetType: "restaurant",
-        targetId: row.target_id,
-        listName: row.list_name,
-        createdAt: row.created_at,
-        available: Boolean(restaurant),
-        name: restaurant ? restaurant.name : null,
-        restaurantId: null,
-        restaurantName: null,
-      };
-    }
-
-    const dish = dishesById[row.target_id];
-    // Defensive: supabase-js can return an embedded to-one relation as a
-    // single-element array rather than an object — same normalization
-    // already applied in src/app/api/dish/[id]/route.js.
-    const parentRaw = dish?.restaurants;
-    const parent = Array.isArray(parentRaw) ? (parentRaw[0] ?? null) : (parentRaw ?? null);
-
-    return {
-      id: row.id,
-      targetType: "dish",
-      targetId: row.target_id,
-      listName: row.list_name,
-      createdAt: row.created_at,
-      available: Boolean(dish),
-      name: dish ? dish.name : null,
-      restaurantId: dish ? dish.restaurant_id : null,
-      restaurantName: parent ? parent.name : null,
-    };
-  });
 }
